@@ -1,0 +1,142 @@
+{
+  "_generated": "DO NOT EDIT. Rendered from state/events.jsonl by engine/board.py.",
+  "project": {
+    "name_en": "Aluminum Extrusion Factory Project",
+    "name_ar": "مشروع مصنع بثق الألمنيوم",
+    "country": "SY",
+    "tracks": {
+      "A_civil": "Civil Works: foundations, hangar, cladding, electrical substation, lighting | الأعمال الإنشائية",
+      "B_equipment": "Equipment and Production Line: procurement, receipt, installation, commissioning, trial production | خط الإنتاج"
+    }
+  },
+  "rendered_at": "2026-10-31T16:25:43+00:00",
+  "event_count": 1,
+  "chain_head": "b75da370c69aeb7363f6d0bb4646f80bc4ded9879bf90b42e59616f95d7ce154",
+  "current_gate": "G1",
+  "gates": [
+    {
+      "id": "G1",
+      "name_en": "Specification and Localization Lock",
+      "name_ar": "تثبيت المواصفات والتوطين",
+      "status": "BLOCKED",
+      "passed_at": null,
+      "missing": [
+        "constraints section `electrical_brands` is UNVERIFIED",
+        "constraints section `banking_and_payment_rails` is UNVERIFIED",
+        "constraints section `customs_and_ports` is UNVERIFIED",
+        "constraints section `grid_and_power` is UNVERIFIED",
+        "constraints section `fx_and_currency` is UNVERIFIED",
+        "verdict tech-spec-auditor/G1/rfp_spec missing",
+        "verdict fin-acct-controller/G1/capex_budget missing",
+        "approval `rfp_lock` has 0/2 eligible APPROVE votes",
+        "approval `rfp_lock` still needs role(s): technical_director"
+      ]
+    },
+    {
+      "id": "G2",
+      "name_en": "Contract and Financial Instrument Lock",
+      "name_ar": "تثبيت العقد والأداة المالية",
+      "status": "BLOCKED",
+      "passed_at": null,
+      "missing": [
+        "previous gate G1 not passed",
+        "verdict tech-spec-auditor/G2/contract_technical_annex missing",
+        "verdict legal-counsel/G2/equipment_contract missing",
+        "verdict fin-acct-controller/G2/payment_instrument missing",
+        "approval `contract_signing` has 0/3 eligible APPROVE votes",
+        "approval `contract_signing` still needs role(s): chair, legal_advisor",
+        "approval `lc_issuance` has 0/2 eligible APPROVE votes",
+        "approval `lc_issuance` still needs role(s): chair, finance_director",
+        "attestation `contract_signed` missing (human must run: attest contract_signed)",
+        "attestation `advance_payment_made` missing (human must run: attest advance_payment_made)"
+      ]
+    },
+    {
+      "id": "G3",
+      "name_en": "Structural Handshake",
+      "name_ar": "التسليم الإنشائي (مخططات الأساسات)",
+      "status": "BLOCKED",
+      "passed_at": null,
+      "missing": [
+        "previous gate G2 not passed",
+        "attestation `foundation_blueprints_received` missing (human must run: attest foundation_blueprints_received)",
+        "verdict tech-spec-auditor/G3/foundation_blueprints missing",
+        "verdict legal-counsel/G3/civil_contract missing",
+        "verdict fin-acct-controller/G3/civil_budget missing",
+        "verdict ops-logistics-coord/G3/civil_and_logistics_plan missing",
+        "verdict hr-planner/G3/staffing_plan missing",
+        "approval `civil_contract_award` has 0/2 eligible APPROVE votes",
+        "approval `civil_contract_award` still needs role(s): operations_director"
+      ]
+    },
+    {
+      "id": "G4",
+      "name_en": "Port to Warehouse and Civil Readiness Sync",
+      "name_ar": "مزامنة الاستلام من المرفأ وجاهزية الأعمال المدنية",
+      "status": "BLOCKED",
+      "passed_at": null,
+      "missing": [
+        "previous gate G3 not passed",
+        "attestation `customs_cleared` missing (human must run: attest customs_cleared)",
+        "no expected shipments registered (human must run: register-shipment)",
+        "attestation `foundations_cured` missing (human must run: attest foundations_cured)",
+        "attestation `hangar_closed` missing (human must run: attest hangar_closed)",
+        "attestation `substation_energized` missing (human must run: attest substation_energized)",
+        "verdict ops-logistics-coord/G4/installation_readiness missing",
+        "verdict hr-planner/G4/technicians_onboarded missing",
+        "approval `civil_readiness_signoff` has 0/2 eligible APPROVE votes",
+        "approval `civil_readiness_signoff` still needs role(s): operations_director, technical_director"
+      ]
+    },
+    {
+      "id": "G5",
+      "name_en": "Installation and Embedded Training",
+      "name_ar": "التركيب والتدريب المرافق",
+      "status": "BLOCKED",
+      "passed_at": null,
+      "missing": [
+        "previous gate G4 not passed",
+        "attestation `experts_on_site` missing (human must run: attest experts_on_site)",
+        "attestation `installation_complete` missing (human must run: attest installation_complete)",
+        "attestation `spare_parts_handover_complete` missing (human must run: attest spare_parts_handover_complete)",
+        "verdict tech-spec-auditor/G5/spare_parts_handover missing",
+        "verdict hr-planner/G5/shadowing_records missing",
+        "approval `installation_acceptance` has 0/2 eligible APPROVE votes",
+        "approval `installation_acceptance` still needs role(s): technical_director"
+      ]
+    },
+    {
+      "id": "G6",
+      "name_en": "Commissioning and Trial Production",
+      "name_ar": "التشغيل التجريبي والإنتاج التجريبي",
+      "status": "BLOCKED",
+      "passed_at": null,
+      "missing": [
+        "previous gate G5 not passed",
+        "attestation `acceptance_tests_passed` missing (human must run: attest acceptance_tests_passed)",
+        "attestation `trial_production_complete` missing (human must run: attest trial_production_complete)",
+        "verdict tech-spec-auditor/G6/acceptance_test_results missing",
+        "verdict legal-counsel/G6/performance_bond_release missing",
+        "verdict fin-acct-controller/G6/retention_and_capitalization missing",
+        "approval `final_acceptance` has 0/3 eligible APPROVE votes",
+        "approval `final_acceptance` still needs role(s): chair, technical_director, finance_director"
+      ]
+    }
+  ],
+  "controlled_actions": {
+    "issue_rfp_to_vendors": "LOCKED",
+    "sign_equipment_contract": "LOCKED",
+    "issue_lc_or_advance_payment": "LOCKED",
+    "request_container_quotes": "LOCKED",
+    "start_technician_recruitment": "LOCKED",
+    "award_civil_contract": "LOCKED",
+    "pour_foundations": "LOCKED",
+    "release_milestone_payment": "PER_REFERENCE",
+    "book_expert_travel": "LOCKED",
+    "release_retention_payment": "LOCKED",
+    "capitalize_assets": "LOCKED"
+  },
+  "open_discrepancies": {},
+  "attestations": {},
+  "latest_verdicts": {}
+}

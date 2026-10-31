@@ -1,0 +1,1 @@
+{"actor":"board_exec","hash":"b75da370c69aeb7363f6d0bb4646f80bc4ded9879bf90b42e59616f95d7ce154","payload":{"action":"book_expert_travel","payment":false,"reasons":["gate G4 not passed"],"ref":null},"prev_hash":"0000000000000000000000000000000000000000000000000000000000000000","seq":1,"ts":"2026-10-31T16:25:43+00:00","type":"ACTION_DENIED"}

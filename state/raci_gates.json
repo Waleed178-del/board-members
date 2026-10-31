@@ -1,0 +1,250 @@
+{
+  "_doc": "Governance rules. The engine (engine/board.py) evaluates these deterministically. Changing this file changes the law of the project: only humans edit it, with BOARD_MAINTENANCE=1, and the change must be minuted.",
+  "schema_version": 1,
+  "project": {
+    "name_en": "Aluminum Extrusion Factory Project",
+    "name_ar": "مشروع مصنع بثق الألمنيوم",
+    "country": "SY",
+    "tracks": {
+      "A_civil": "Civil Works: foundations, hangar, cladding, electrical substation, lighting | الأعمال الإنشائية",
+      "B_equipment": "Equipment and Production Line: procurement, receipt, installation, commissioning, trial production | خط الإنتاج"
+    }
+  },
+  "roles": [
+    "chair",
+    "finance_director",
+    "technical_director",
+    "operations_director",
+    "legal_advisor",
+    "hr_director",
+    "board_member"
+  ],
+  "raci": {
+    "_legend": "R responsible, A accountable (human), C consulted, I informed",
+    "G1": {"R": ["tech-spec-auditor"], "A": ["technical_director"], "C": ["fin-acct-controller"], "I": ["chair"]},
+    "G2": {"R": ["legal-counsel", "fin-acct-controller"], "A": ["chair", "finance_director", "legal_advisor"], "C": ["tech-spec-auditor"], "I": ["board_member"]},
+    "G3": {"R": ["ops-logistics-coord"], "A": ["operations_director"], "C": ["tech-spec-auditor", "legal-counsel", "fin-acct-controller", "hr-planner"], "I": ["chair"]},
+    "G4": {"R": ["ops-logistics-coord"], "A": ["operations_director", "technical_director"], "C": ["legal-counsel", "fin-acct-controller", "hr-planner"], "I": ["chair"]},
+    "G5": {"R": ["tech-spec-auditor", "hr-planner"], "A": ["technical_director"], "C": ["ops-logistics-coord"], "I": ["chair"]},
+    "G6": {"R": ["tech-spec-auditor", "legal-counsel", "fin-acct-controller"], "A": ["chair", "technical_director", "finance_director"], "C": ["hr-planner"], "I": ["board_member"]}
+  },
+  "gates": [
+    {
+      "id": "G1",
+      "name_en": "Specification and Localization Lock",
+      "name_ar": "تثبيت المواصفات والتوطين",
+      "output": "specs/rfp_spec_v1.md locked",
+      "conditions": [
+        {"computed": "constraints_verified"},
+        {"verdict": "tech-spec-auditor", "gate": "G1", "subject": "rfp_spec"},
+        {"verdict": "fin-acct-controller", "gate": "G1", "subject": "capex_budget"},
+        {"approval": "rfp_lock"}
+      ]
+    },
+    {
+      "id": "G2",
+      "name_en": "Contract and Financial Instrument Lock",
+      "name_ar": "تثبيت العقد والأداة المالية",
+      "output": "Signed equipment contract, L/C or payment instrument issued, advance logged as ADVANCE_TO_SUPPLIER",
+      "conditions": [
+        {"verdict": "tech-spec-auditor", "gate": "G2", "subject": "contract_technical_annex"},
+        {"verdict": "legal-counsel", "gate": "G2", "subject": "equipment_contract"},
+        {"verdict": "fin-acct-controller", "gate": "G2", "subject": "payment_instrument"},
+        {"approval": "contract_signing"},
+        {"approval": "lc_issuance"},
+        {"flag": "contract_signed"},
+        {"flag": "advance_payment_made"}
+      ]
+    },
+    {
+      "id": "G3",
+      "name_en": "Structural Handshake",
+      "name_ar": "التسليم الإنشائي (مخططات الأساسات)",
+      "output": "Civil track unlocked, civil contractor awarded, shipping plan and recruitment running",
+      "conditions": [
+        {"flag": "foundation_blueprints_received"},
+        {"verdict": "tech-spec-auditor", "gate": "G3", "subject": "foundation_blueprints"},
+        {"verdict": "legal-counsel", "gate": "G3", "subject": "civil_contract"},
+        {"verdict": "fin-acct-controller", "gate": "G3", "subject": "civil_budget"},
+        {"verdict": "ops-logistics-coord", "gate": "G3", "subject": "civil_and_logistics_plan"},
+        {"verdict": "hr-planner", "gate": "G3", "subject": "staffing_plan"},
+        {"approval": "civil_contract_award"}
+      ]
+    },
+    {
+      "id": "G4",
+      "name_en": "Port to Warehouse and Civil Readiness Sync",
+      "name_ar": "مزامنة الاستلام من المرفأ وجاهزية الأعمال المدنية",
+      "output": "READY_FOR_INSTALL. Expert travel unlocked",
+      "conditions": [
+        {"flag": "customs_cleared"},
+        {"computed": "all_critical_received"},
+        {"computed": "zero_open_discrepancies"},
+        {"flag": "foundations_cured"},
+        {"flag": "hangar_closed"},
+        {"flag": "substation_energized"},
+        {"verdict": "ops-logistics-coord", "gate": "G4", "subject": "installation_readiness"},
+        {"verdict": "hr-planner", "gate": "G4", "subject": "technicians_onboarded"},
+        {"approval": "civil_readiness_signoff"}
+      ]
+    },
+    {
+      "id": "G5",
+      "name_en": "Installation and Embedded Training",
+      "name_ar": "التركيب والتدريب المرافق",
+      "output": "Line installed, technicians shadowed, spare parts handed over",
+      "conditions": [
+        {"flag": "experts_on_site"},
+        {"flag": "installation_complete"},
+        {"flag": "spare_parts_handover_complete"},
+        {"verdict": "tech-spec-auditor", "gate": "G5", "subject": "spare_parts_handover"},
+        {"verdict": "hr-planner", "gate": "G5", "subject": "shadowing_records"},
+        {"approval": "installation_acceptance"}
+      ]
+    },
+    {
+      "id": "G6",
+      "name_en": "Commissioning and Trial Production",
+      "name_ar": "التشغيل التجريبي والإنتاج التجريبي",
+      "output": "Final acceptance, retention released, assets capitalized and depreciation started",
+      "conditions": [
+        {"flag": "acceptance_tests_passed"},
+        {"flag": "trial_production_complete"},
+        {"verdict": "tech-spec-auditor", "gate": "G6", "subject": "acceptance_test_results"},
+        {"verdict": "legal-counsel", "gate": "G6", "subject": "performance_bond_release"},
+        {"verdict": "fin-acct-controller", "gate": "G6", "subject": "retention_and_capitalization"},
+        {"approval": "final_acceptance"}
+      ]
+    }
+  ],
+  "approvals": {
+    "rfp_lock": {
+      "label_en": "Lock the technical RFP", "label_ar": "اعتماد كراسة الشروط الفنية",
+      "quorum": 2, "roles": ["chair", "technical_director", "operations_director", "board_member"],
+      "required_roles": ["technical_director"]
+    },
+    "contract_signing": {
+      "label_en": "Sign the equipment supply contract", "label_ar": "توقيع عقد توريد خط الإنتاج",
+      "quorum": 3, "roles": ["chair", "finance_director", "technical_director", "legal_advisor", "board_member"],
+      "required_roles": ["chair", "legal_advisor"]
+    },
+    "lc_issuance": {
+      "label_en": "Issue the L/C or advance payment instrument", "label_ar": "فتح الاعتماد المستندي أو أداة الدفعة المقدمة",
+      "quorum": 2, "roles": ["chair", "finance_director"],
+      "required_roles": ["chair", "finance_director"]
+    },
+    "civil_contract_award": {
+      "label_en": "Award the civil works contract", "label_ar": "ترسية عقد الأعمال الإنشائية",
+      "quorum": 2, "roles": ["chair", "operations_director", "technical_director", "finance_director"],
+      "required_roles": ["operations_director"]
+    },
+    "civil_readiness_signoff": {
+      "label_en": "Civil readiness for installation", "label_ar": "اعتماد جاهزية الموقع للتركيب",
+      "quorum": 2, "roles": ["operations_director", "technical_director", "chair"],
+      "required_roles": ["operations_director", "technical_director"]
+    },
+    "installation_acceptance": {
+      "label_en": "Accept mechanical and electrical installation", "label_ar": "استلام أعمال التركيب",
+      "quorum": 2, "roles": ["technical_director", "operations_director", "chair"],
+      "required_roles": ["technical_director"]
+    },
+    "final_acceptance": {
+      "label_en": "Final acceptance and retention release", "label_ar": "الاستلام النهائي وتحرير المحتجزات",
+      "quorum": 3, "roles": ["chair", "technical_director", "finance_director", "legal_advisor"],
+      "required_roles": ["chair", "technical_director", "finance_director"]
+    },
+    "payment_release": {
+      "label_en": "Release a milestone payment (key is payment_release:<ref>)", "label_ar": "صرف دفعة مرحلية",
+      "quorum": 2, "roles": ["chair", "finance_director"],
+      "required_roles": ["finance_director"]
+    }
+  },
+  "attestations": {
+    "contract_signed": {"label_ar": "العقد موقّع من الطرفين", "roles": ["chair", "legal_advisor"]},
+    "advance_payment_made": {"label_ar": "تم تحويل الدفعة المقدمة", "roles": ["finance_director"]},
+    "foundation_blueprints_received": {"label_ar": "استلام مخططات الأساسات من المورد", "roles": ["technical_director", "operations_director"]},
+    "customs_cleared": {"label_ar": "التخليص الجمركي منجز", "roles": ["operations_director"]},
+    "foundations_cured": {"label_ar": "الأساسات منفذة ومعالجة", "roles": ["operations_director", "technical_director"]},
+    "hangar_closed": {"label_ar": "الهنغار مغلق ومكسو", "roles": ["operations_director", "technical_director"]},
+    "substation_energized": {"label_ar": "مركز التحويل مُغذّى وتمت تجربته", "roles": ["operations_director", "technical_director"]},
+    "experts_on_site": {"label_ar": "خبراء المورد في الموقع", "roles": ["operations_director", "hr_director"]},
+    "installation_complete": {"label_ar": "التركيب منجز", "roles": ["technical_director"]},
+    "spare_parts_handover_complete": {"label_ar": "تسليم قطع الغيار منجز", "roles": ["technical_director"]},
+    "acceptance_tests_passed": {"label_ar": "اختبارات القبول ناجحة", "roles": ["technical_director"]},
+    "trial_production_complete": {"label_ar": "الإنتاج التجريبي منجز", "roles": ["technical_director"]}
+  },
+  "controlled_actions": {
+    "issue_rfp_to_vendors": {
+      "label_en": "Send the locked RFP to vendors", "label_ar": "إرسال كراسة الشروط للموردين",
+      "conditions": [{"gate_passed": "G1"}]
+    },
+    "sign_equipment_contract": {
+      "label_en": "Sign the equipment contract", "label_ar": "توقيع عقد المعدات",
+      "conditions": [
+        {"gate_passed": "G1"},
+        {"verdict": "tech-spec-auditor", "gate": "G2", "subject": "contract_technical_annex"},
+        {"verdict": "legal-counsel", "gate": "G2", "subject": "equipment_contract"},
+        {"verdict": "fin-acct-controller", "gate": "G2", "subject": "payment_instrument"},
+        {"approval": "contract_signing"}
+      ]
+    },
+    "issue_lc_or_advance_payment": {
+      "label_en": "Open L/C or wire the advance", "label_ar": "فتح الاعتماد أو تحويل الدفعة المقدمة",
+      "payment": true,
+      "conditions": [
+        {"flag": "contract_signed"},
+        {"verdict": "legal-counsel", "gate": "G2", "subject": "equipment_contract"},
+        {"verdict": "fin-acct-controller", "gate": "G2", "subject": "payment_instrument"},
+        {"approval": "lc_issuance"}
+      ]
+    },
+    "request_container_quotes": {
+      "label_en": "Request freight and container quotes", "label_ar": "طلب عروض الشحن والحاويات",
+      "conditions": [{"gate_passed": "G2"}]
+    },
+    "start_technician_recruitment": {
+      "label_en": "Open technician recruitment", "label_ar": "بدء توظيف الفنيين",
+      "conditions": [{"gate_passed": "G2"}]
+    },
+    "award_civil_contract": {
+      "label_en": "Award the civil works contract", "label_ar": "ترسية عقد الأعمال المدنية",
+      "conditions": [
+        {"gate_passed": "G2"},
+        {"flag": "foundation_blueprints_received"},
+        {"verdict": "tech-spec-auditor", "gate": "G3", "subject": "foundation_blueprints"},
+        {"verdict": "legal-counsel", "gate": "G3", "subject": "civil_contract"},
+        {"approval": "civil_contract_award"}
+      ]
+    },
+    "pour_foundations": {
+      "label_en": "Pour machine foundations", "label_ar": "صب أساسات المكابس والآلات",
+      "conditions": [
+        {"gate_passed": "G3"}
+      ]
+    },
+    "release_milestone_payment": {
+      "label_en": "Release a vendor or contractor milestone payment (needs --ref)", "label_ar": "صرف دفعة مرحلية",
+      "payment": true,
+      "conditions": [
+        {"gate_passed": "G2"},
+        {"computed": "zero_open_discrepancies"},
+        {"verdict": "legal-counsel", "gate": "OPS", "subject": "payment:{ref}"},
+        {"verdict": "fin-acct-controller", "gate": "OPS", "subject": "payment:{ref}"},
+        {"approval": "payment_release:{ref}"}
+      ]
+    },
+    "book_expert_travel": {
+      "label_en": "Book visas, flights, hotels for foreign installation experts", "label_ar": "حجز تأشيرات وتذاكر وفنادق خبراء التركيب",
+      "conditions": [{"gate_passed": "G4"}]
+    },
+    "release_retention_payment": {
+      "label_en": "Release final retention", "label_ar": "تحرير المحتجزات النهائية",
+      "payment": true,
+      "conditions": [{"gate_passed": "G6"}]
+    },
+    "capitalize_assets": {
+      "label_en": "Reclassify CWIP to fixed assets and start depreciation", "label_ar": "رسملة الأصول وبدء الإهلاك",
+      "conditions": [{"gate_passed": "G6"}]
+    }
+  }
+}
