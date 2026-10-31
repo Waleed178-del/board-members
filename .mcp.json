@@ -1,0 +1,24 @@
+{
+  "mcpServers": {
+    "board-ledger": {
+      "command": "python3",
+      "args": ["${CLAUDE_PROJECT_DIR:-.}/connectors/board_ledger_mcp.py"]
+    },
+    "telegram-board": {
+      "command": "python3",
+      "args": ["${CLAUDE_PROJECT_DIR:-.}/connectors/telegram_mcp.py"],
+      "env": {
+        "TELEGRAM_BOT_TOKEN": "${TELEGRAM_BOT_TOKEN:-}",
+        "TELEGRAM_CHAT_ID": "${TELEGRAM_CHAT_ID:-}"
+      }
+    },
+    "m365-drafts": {
+      "command": "python3",
+      "args": ["${CLAUDE_PROJECT_DIR:-.}/connectors/m365_drafts_mcp.py"],
+      "env": {
+        "M365_TENANT_ID": "${M365_TENANT_ID:-}",
+        "M365_CLIENT_ID": "${M365_CLIENT_ID:-}"
+      }
+    }
+  }
+}
