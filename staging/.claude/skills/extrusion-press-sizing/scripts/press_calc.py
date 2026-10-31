@@ -3,8 +3,7 @@
 Extrusion press sizing check. Prints only, writes nothing.
 
 Example:
-  python3 press_calc.py --force-usTon 1800 --container-mm 178 --billet-mm 7 inch? no: use --billet-dia-mm 170
-        --billet-len-mm 650 --profile-area-mm2 450 --holes 2 --ram-mm-s 8 --dead-cycle-s 22
+  python3 press_calc.py --force-usTon 1800 --container-mm 178 --billet-dia-mm 170 --billet-len-mm 650 --profile-area-mm2 450 --holes 2 --ram-mm-s 8 --dead-cycle-s 22
         --alloy 6063 --hours-per-year 5000 --recovery 0.85
 
 Physics used (standard first order relations):
