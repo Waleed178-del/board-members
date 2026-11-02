@@ -1,3 +1,4 @@
+<meta charset="utf-8">
 <title>Extrusion Board Room</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -101,6 +102,10 @@ button:focus-visible,select:focus-visible{outline:2px solid var(--accent);outlin
 /* board diagram */
 .board svg{display:block;width:100%;height:auto;max-width:100%}
 .board text{font-family:var(--f-body)}
+.halo{paint-order:stroke;stroke:var(--panel);stroke-width:5px;stroke-linejoin:round}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:11.5px;color:var(--muted);padding-top:6px}
+.legend i{display:inline-block;width:18px;height:0;border-top:2px dashed var(--bad);vertical-align:middle;margin-right:6px;opacity:.7}
+.legend i.go{border-top-color:var(--accent)}.legend i.ok{border-top:2px solid var(--ok)}.legend i.no{border-top:2px solid var(--bad);opacity:1}
 .spoke{stroke:var(--line);stroke-width:1.5;fill:none}
 .spoke.active{stroke:var(--accent);stroke-width:2;stroke-dasharray:6 6;animation:flow 0.9s linear infinite}
 .spoke.up{animation-direction:reverse}
@@ -119,7 +124,7 @@ button:focus-visible,select:focus-visible{outline:2px solid var(--accent);outlin
 .lane.idle{opacity:.6}
 .lane.busy{border-color:color-mix(in srgb,var(--c) 55%,var(--line))}
 .lane-h{display:flex;align-items:center;gap:8px}
-.mono-badge{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-family:var(--f-display);font-weight:700;font-size:12px;letter-spacing:.03em;color:var(--panel);background:var(--c);flex:none}
+.mono-badge{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-family:var(--f-display);font-weight:700;font-size:10.5px;letter-spacing:0;color:var(--panel);background:var(--c);flex:none}
 .lane-h .n{font-weight:600;font-size:12.5px;line-height:1.2}
 .lane-h .ar{font-size:11.5px;color:var(--muted);text-align:left}
 .pill{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:999px;border:1px solid var(--line);color:var(--muted);white-space:nowrap}
@@ -142,11 +147,11 @@ button:focus-visible,select:focus-visible{outline:2px solid var(--accent);outlin
 
 /* transcript */
 .feed{max-height:560px;overflow-y:auto;display:flex;flex-direction:column;gap:2px;scroll-behavior:smooth}
-.row{display:grid;grid-template-columns:62px 28px minmax(0,1fr);gap:8px;padding:6px 4px;border-radius:5px;align-items:start}
+.row{display:grid;grid-template-columns:62px 30px minmax(0,1fr);gap:8px;padding:6px 4px;border-radius:5px;align-items:start}
 .row.fresh{animation:fadein .35s ease-out}
 @keyframes fadein{from{background:var(--info-bg)}to{background:transparent}}
 .row .ts{font-family:var(--f-mono);font-size:11px;color:var(--muted);padding-top:3px}
-.who{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-family:var(--f-display);font-weight:700;font-size:10px;color:var(--panel);background:var(--c,var(--muted))}
+.who{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-family:var(--f-display);font-weight:700;font-size:9.5px;color:var(--panel);background:var(--c,var(--muted))}
 .row .body{min-width:0;display:flex;flex-direction:column;gap:4px}
 .row .body p{margin:0}
 .row .body .ar{font-size:13px;color:var(--muted)}
@@ -670,15 +675,15 @@ function Who({ k }){ const w = WHO[k] || WHO.exec; return html`<span className="
 
 /* ---------------------------------------------------------------- board diagram */
 function BoardDiagram({ st }){
-  const W = 640, H = 270, hub = { x:320, y:62 }, eng = { x:560, y:62 }, hum = { x:80, y:62 };
-  const xs = [76, 198, 320, 442, 564], y = 206;
+  const W = 640, H = 300, hub = { x:320, y:62 }, eng = { x:560, y:62 }, hum = { x:80, y:62 };
+  const xs = [76, 198, 320, 442, 564], y = 232;
   const busy = AG_KEYS.filter(k => ["reading","analyzing"].includes(st.agents[k].status));
   return html`<svg viewBox=${`0 0 ${W} ${H}`} role="img" aria-label="Hub and spoke: Board_Exec dispatches to five isolated agents; engine and humans hold the decisions">
     <defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--muted)"></path></marker></defs>
-    <line x1=${hum.x + 34} y1=${hum.y} x2=${hub.x - 40} y2=${hub.y} className=${"spoke" + (st.human && !st.human.done ? " active up" : "")}></line>
-    <line x1=${hub.x + 40} y1=${hub.y} x2=${eng.x - 36} y2=${eng.y} className=${"spoke" + (st.action ? (st.action.ok ? " ok" : " bad") : "")}></line>
-    <path d=${`M${hum.x} ${hum.y + 26} C ${hum.x} ${hum.y + 120}, ${eng.x} ${hum.y + 120}, ${eng.x} ${eng.y + 26}`} className="spoke" style=${{ opacity:.6 }} markerEnd="url(#arr)"></path>
-    <text x=${(hum.x + eng.x) / 2} y=${hum.y + 104} textAnchor="middle" fontSize="10" fill="var(--muted)">votes and attestations go straight to the engine, with a PIN</text>
+    <line x1=${hum.x + 60} y1=${hum.y} x2=${hub.x - 78} y2=${hub.y} className=${"spoke" + (st.human && !st.human.done ? " active up" : "")}></line>
+    <line x1=${hub.x + 78} y1=${hub.y} x2=${eng.x - 60} y2=${eng.y} className=${"spoke" + (st.action ? (st.action.ok ? " ok" : " bad") : "")}></line>
+    <path d=${`M${hum.x} ${hum.y + 26} C ${hum.x} ${hum.y + 92}, ${eng.x} ${hum.y + 92}, ${eng.x} ${eng.y + 26}`} className="spoke" style=${{ opacity:.6 }} markerEnd="url(#arr)"></path>
+    <text className="halo" x=${(hum.x + eng.x) / 2} y=${hum.y + 86} textAnchor="middle" fontSize="10" fill="var(--muted)">votes and attestations go straight to the engine, with a PIN</text>
     ${xs.slice(0,4).map((x, j) => html`<line key=${"b" + j} x1=${x + 30} y1=${y} x2=${xs[j + 1] - 30} y2=${y} className="blocker"></line>`)}
     ${AG_KEYS.map((k, j) => {
       const a = st.agents[k], ret = st.returning[k];
@@ -686,17 +691,17 @@ function BoardDiagram({ st }){
       return html`<line key=${"s" + k} x1=${hub.x} y1=${hub.y + 34} x2=${xs[j]} y2=${y - 30} className=${cls}></line>`;
     })}
     <g>
-      <rect x=${hum.x - 52} y=${hum.y - 26} width="104" height="52" rx="6" className="node-ring" stroke="var(--accent)"></rect>
+      <rect x=${hum.x - 60} y=${hum.y - 26} width="120" height="52" rx="6" className="node-ring" stroke="var(--accent)"></rect>
       <text x=${hum.x} y=${hum.y - 4} textAnchor="middle" fontSize="13" fontWeight="600" fill="var(--ink)">Board members</text>
       <text x=${hum.x} y=${hum.y + 13} textAnchor="middle" fontSize="10.5" fill="var(--muted)">humans · PIN</text>
     </g>
     <g>
-      <rect x=${hub.x - 62} y=${hub.y - 32} width="124" height="64" rx="8" fill="var(--ink)"></rect>
+      <rect x=${hub.x - 78} y=${hub.y - 32} width="156" height="64" rx="8" fill="var(--ink)"></rect>
       <text x=${hub.x} y=${hub.y - 6} textAnchor="middle" fontSize="15" fontWeight="600" fill="var(--panel)">Board_Exec</text>
       <text x=${hub.x} y=${hub.y + 13} textAnchor="middle" fontSize="10.5" fill="var(--panel)" opacity=".75">orchestrator · routes only</text>
     </g>
     <g>
-      <rect x=${eng.x - 52} y=${eng.y - 26} width="104" height="52" rx="6" className="node-ring" stroke=${st.broken ? "var(--bad)" : "var(--info)"} strokeDasharray=${st.broken ? "4 3" : "0"}></rect>
+      <rect x=${eng.x - 60} y=${eng.y - 26} width="120" height="52" rx="6" className="node-ring" stroke=${st.broken ? "var(--bad)" : "var(--info)"} strokeDasharray=${st.broken ? "4 3" : "0"}></rect>
       <text x=${eng.x} y=${eng.y - 4} textAnchor="middle" fontSize="13" fontWeight="600" fill=${st.broken ? "var(--bad)" : "var(--ink)"}>${st.broken ? "Engine LOCKED" : "Engine"}</text>
       <text x=${eng.x} y=${eng.y + 13} textAnchor="middle" fontSize="10.5" fill="var(--muted)">gates · hash chain</text>
     </g>
@@ -706,12 +711,11 @@ function BoardDiagram({ st }){
       return html`<g key=${"n" + k} className=${isBusy ? "node-busy" : ""} opacity=${a.status === "idle" ? .55 : 1}>
         <circle cx=${xs[j]} cy=${y} r="28" className="node-ring" stroke=${ring} strokeWidth=${a.verdict ? 3 : 2}></circle>
         <circle cx=${xs[j]} cy=${y} r="20" fill=${A.c}></circle>
-        <text x=${xs[j]} y=${y + 4} textAnchor="middle" fontSize="11" fontWeight="700" fill="var(--panel)" style=${{ fontFamily:"var(--f-display)", letterSpacing:".04em" }}>${A.code}</text>
+        <text x=${xs[j]} y=${y + 4} textAnchor="middle" fontSize="10" fontWeight="700" fill="var(--panel)" style=${{ fontFamily:"var(--f-display)", letterSpacing:".04em" }}>${A.code}</text>
         <text x=${xs[j]} y=${y + 46} textAnchor="middle" fontSize="11" fill="var(--ink)">${A.en}</text>
         <text x=${xs[j]} y=${y + 60} textAnchor="middle" fontSize="10" fill=${a.verdict ? (a.stale ? "var(--warn)" : a.verdict === "APPROVED" ? "var(--ok)" : "var(--bad)") : "var(--muted)"} fontWeight=${a.verdict ? 600 : 400}>${a.stale ? "STALE" : a.verdict || (isBusy ? a.status : "")}</text>
       </g>`;
     })}
-    <text x=${W / 2} y=${y + 14 - 50} textAnchor="middle" fontSize="9.5" fill="var(--bad)" opacity=".75">agents never talk to each other</text>
   </svg>`;
 }
 
@@ -860,7 +864,7 @@ function App(){
 
       <section className="col">
         <section className="panel board"><div className="panel-h"><h2>Board room · hub and spoke</h2><span className="label">${sc.g} · ${sc.title}</span></div>
-          <div className="panel-b"><${BoardDiagram} st=${st} /></div></section>
+          <div className="panel-b"><${BoardDiagram} st=${st} /><div className="legend"><span><i className="go"></i>task going out</span><span><i className="ok"></i>approved verdict back</span><span><i className="no"></i>veto back</span><span><i></i>no agent to agent channel</span></div></div></section>
         <section className="lanes">${AG_KEYS.map(k => { const a = st.agents[k], A = AGENTS[k];
           const busy = ["reading","analyzing"].includes(a.status);
           return html`<article key=${k} className=${"lane " + (a.status === "idle" ? "idle" : busy ? "busy" : "")} style=${{ "--c":A.c }}>

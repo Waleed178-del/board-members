@@ -1,0 +1,917 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>html{color-scheme:light dark}body{margin:0}[hidden]{display:none!important}</style>
+<title>Extrusion Board Room</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: control-room console. Scenario rail | board diagram + agent lanes + transcript | engine column. */
+:root{
+  --bg:#E9ECEF; --panel:#F7F8F9; --panel2:#EEF1F3; --ink:#141C24; --muted:#5A6672; --line:#CDD3D9; --line2:#DCE1E6;
+  --accent:#2550C0; --accent-ink:#FFFFFF;
+  --ok:#1D7A4C; --ok-bg:#E1F2E8; --bad:#B8322A; --bad-bg:#F8E3E1; --warn:#9A6A00; --warn-bg:#F8EFD6; --info:#3B5B86; --info-bg:#E3EAF3;
+  --tech:#2F67B1; --legal:#7547B0; --fin:#167D66; --ops:#A35A1A; --hr:#B03A66; --exec:#141C24;
+  --term-bg:#18212A; --term-ink:#D6E0E8; --term-dim:#8899A8; --term-ok:#7FD1A4; --term-bad:#F09189;
+  --shadow:0 1px 0 rgba(20,28,36,.04),0 6px 18px -10px rgba(20,28,36,.18);
+  --f-display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-ar:"IBM Plex Sans Arabic","Noto Naskh Arabic","Geeza Pro",Tahoma,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0E1318; --panel:#151C22; --panel2:#1A222A; --ink:#E4EAEF; --muted:#93A1AE; --line:#2A353F; --line2:#222C35;
+  --accent:#7598F2; --accent-ink:#0E1318;
+  --ok:#5FC290; --ok-bg:#16301F; --bad:#F0857B; --bad-bg:#3A1A18; --warn:#E3B54A; --warn-bg:#352A10; --info:#8FB0DA; --info-bg:#1A2737;
+  --tech:#76A6E8; --legal:#B48DEB; --fin:#5CC7AB; --ops:#E09A5A; --hr:#E8829F; --exec:#E4EAEF;
+  --term-bg:#0A0F13; --term-ink:#D6E0E8; --term-dim:#7D8C99; --term-ok:#7FD1A4; --term-bad:#F09189;
+  --shadow:0 1px 0 rgba(0,0,0,.3),0 8px 22px -12px rgba(0,0,0,.6); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0E1318; --panel:#151C22; --panel2:#1A222A; --ink:#E4EAEF; --muted:#93A1AE; --line:#2A353F; --line2:#222C35;
+  --accent:#7598F2; --accent-ink:#0E1318;
+  --ok:#5FC290; --ok-bg:#16301F; --bad:#F0857B; --bad-bg:#3A1A18; --warn:#E3B54A; --warn-bg:#352A10; --info:#8FB0DA; --info-bg:#1A2737;
+  --tech:#76A6E8; --legal:#B48DEB; --fin:#5CC7AB; --ops:#E09A5A; --hr:#E8829F; --exec:#E4EAEF;
+  --term-bg:#0A0F13; --term-ink:#D6E0E8; --term-dim:#7D8C99; --term-ok:#7FD1A4; --term-bad:#F09189;
+  --shadow:0 1px 0 rgba(0,0,0,.3),0 8px 22px -12px rgba(0,0,0,.6); color-scheme:dark}
+
+*{box-sizing:border-box}
+html,body{background:var(--bg);color:var(--ink)}
+body{font-family:var(--f-body);font-size:14px;line-height:1.45;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--panel)}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.ar{font-family:var(--f-ar);direction:rtl;text-align:right;line-height:1.7}
+.mono{font-family:var(--f-mono)}
+.tabnum{font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+.label{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+
+/* top bar */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:var(--panel);border-bottom:1px solid var(--line)}
+.top-in{display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px;padding-block:10px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.brand{display:flex;align-items:baseline;gap:10px;min-width:0}
+.brand h1{font-family:var(--f-display);font-weight:700;font-size:24px;letter-spacing:.01em;margin:0;line-height:1}
+.brand .ar{font-size:14px;color:var(--muted)}
+.clock{font-family:var(--f-mono);font-size:12px;color:var(--muted);padding:4px 8px;border:1px solid var(--line);border-radius:4px;background:var(--panel2);white-space:nowrap}
+.controls{display:flex;align-items:center;gap:6px;margin-left:auto;flex-wrap:wrap}
+.btn{border:1px solid var(--line);background:var(--panel);padding:6px 12px;border-radius:5px;font-weight:500;display:inline-flex;align-items:center;gap:6px;min-height:32px}
+.btn:hover{border-color:var(--muted)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:5px;overflow:hidden}
+.seg button{border:0;background:var(--panel);padding:6px 9px;font-family:var(--f-mono);font-size:12px;min-height:32px}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--panel)}
+.progress{height:4px;background:var(--line2);position:relative}
+.progress i{position:absolute;inset:0 auto 0 0;background:var(--accent);transition:width .25s}
+.notice{font-size:12px;color:var(--muted);padding-block:6px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));border-bottom:1px solid var(--line2);background:var(--panel2)}
+
+/* grid */
+.grid{display:grid;grid-template-columns:272px minmax(0,1fr) 352px;gap:16px;padding-block:16px 40px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));align-items:start}
+@media (max-width:1240px){.grid{grid-template-columns:minmax(0,1fr) 340px}.col-left{grid-column:1 / -1}}
+@media (max-width:900px){.grid{grid-template-columns:minmax(0,1fr)}}
+.col{display:flex;flex-direction:column;gap:16px;min-width:0}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);min-width:0}
+.panel-h{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 14px;border-bottom:1px solid var(--line2)}
+.panel-h h2{margin:0;font-family:var(--f-display);font-weight:600;font-size:17px;letter-spacing:.02em}
+.panel-b{padding:12px 14px}
+
+/* scenarios */
+.scen-list{display:flex;flex-direction:column;gap:6px}
+@media (max-width:1240px){.scen-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}}
+.scen{text-align:left;border:1px solid var(--line2);background:var(--panel);border-radius:6px;padding:9px 11px;display:grid;grid-template-columns:auto 1fr;gap:2px 10px;align-items:start}
+.scen:hover{border-color:var(--muted)}
+.scen[aria-current="true"]{border-color:var(--accent);background:var(--info-bg)}
+.scen .g{font-family:var(--f-display);font-weight:700;font-size:20px;line-height:1;grid-row:span 3;color:var(--muted);padding-top:2px;min-width:26px}
+.scen[aria-current="true"] .g{color:var(--accent)}
+.scen .t{font-weight:600;font-size:13px;line-height:1.3}
+.scen .ta{font-family:var(--f-ar);font-size:12px;color:var(--muted);direction:rtl;text-align:right}
+.tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.tag{font-size:10.5px;padding:1px 6px;border-radius:3px;background:var(--panel2);border:1px solid var(--line2);color:var(--muted)}
+
+/* gate rail */
+.rail{display:flex;flex-direction:column;gap:0}
+.rail-row{display:grid;grid-template-columns:36px 1fr;gap:10px;align-items:center;position:relative;padding:5px 0}
+.rail-row::before{content:"";position:absolute;left:17px;top:-4px;bottom:-4px;width:2px;background:var(--line)}
+.rail-row:first-child::before{top:50%}.rail-row:last-child::before{bottom:50%}
+.gnode{position:relative;z-index:1;width:36px;height:24px;border-radius:4px;display:grid;place-items:center;font-family:var(--f-display);font-weight:700;font-size:14px;border:1.5px solid var(--line);background:var(--panel)}
+.gnode.passed{background:var(--ok);border-color:var(--ok);color:var(--panel)}
+.gnode.current{border-color:var(--accent);color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 18%,transparent)}
+.gnode.locked{color:var(--muted)}
+.rail-row .nm{font-size:12px;line-height:1.25}
+.rail-row .nm .ar{font-size:11.5px;color:var(--muted);text-align:left;direction:rtl;display:block}
+
+/* board diagram */
+.board svg{display:block;width:100%;height:auto;max-width:100%}
+.board text{font-family:var(--f-body)}
+.halo{paint-order:stroke;stroke:var(--panel);stroke-width:5px;stroke-linejoin:round}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:11.5px;color:var(--muted);padding-top:6px}
+.legend i{display:inline-block;width:18px;height:0;border-top:2px dashed var(--bad);vertical-align:middle;margin-right:6px;opacity:.7}
+.legend i.go{border-top-color:var(--accent)}.legend i.ok{border-top:2px solid var(--ok)}.legend i.no{border-top:2px solid var(--bad);opacity:1}
+.spoke{stroke:var(--line);stroke-width:1.5;fill:none}
+.spoke.active{stroke:var(--accent);stroke-width:2;stroke-dasharray:6 6;animation:flow 0.9s linear infinite}
+.spoke.up{animation-direction:reverse}
+.spoke.ok{stroke:var(--ok);stroke-dasharray:none}.spoke.bad{stroke:var(--bad);stroke-dasharray:none}.spoke.warn{stroke:var(--warn);stroke-dasharray:none}
+@keyframes flow{to{stroke-dashoffset:-24}}
+.node-ring{fill:var(--panel);stroke-width:2}
+.node-busy{animation:pulse 1.4s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
+.blocker{stroke:var(--bad);stroke-width:1.5;stroke-dasharray:3 4;fill:none;opacity:.55}
+
+/* agent lanes */
+.lanes{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+@media (max-width:1500px){.lanes{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:700px){.lanes{grid-template-columns:minmax(0,1fr)}}
+.lane{border:1px solid var(--line2);border-radius:7px;background:var(--panel);padding:10px;display:flex;flex-direction:column;gap:8px;min-width:0;transition:border-color .2s,opacity .2s}
+.lane.idle{opacity:.6}
+.lane.busy{border-color:color-mix(in srgb,var(--c) 55%,var(--line))}
+.lane-h{display:flex;align-items:center;gap:8px}
+.mono-badge{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-family:var(--f-display);font-weight:700;font-size:10.5px;letter-spacing:0;color:var(--panel);background:var(--c);flex:none}
+.lane-h .n{font-weight:600;font-size:12.5px;line-height:1.2}
+.lane-h .ar{font-size:11.5px;color:var(--muted);text-align:left}
+.pill{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:999px;border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+.pill .dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+.pill.reading,.pill.analyzing{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 40%,transparent)}
+.pill.reading .dot,.pill.analyzing .dot{animation:pulse 1s infinite}
+.pill.APPROVED{color:var(--ok);background:var(--ok-bg);border-color:transparent}
+.pill.VETOED{color:var(--bad);background:var(--bad-bg);border-color:transparent}
+.pill.NEEDS_INFO{color:var(--warn);background:var(--warn-bg);border-color:transparent}
+.pill.STALE{color:var(--warn);background:var(--warn-bg);border-color:transparent;text-decoration:line-through}
+.subject{font-family:var(--f-mono);font-size:11px;color:var(--muted);overflow-wrap:anywhere}
+.thought{font-size:12.5px;min-height:3.2em;color:var(--ink)}
+.thought .cursor{display:inline-block;width:6px;height:13px;background:var(--c);vertical-align:-2px;margin-left:2px;animation:pulse .8s infinite}
+.finds{display:flex;flex-direction:column;gap:4px}
+.find{display:grid;grid-template-columns:auto 1fr;gap:6px;font-size:11.5px;align-items:start}
+.sev{font-family:var(--f-mono);font-size:9.5px;font-weight:500;padding:1px 4px;border-radius:3px;line-height:1.4}
+.sev.CRITICAL{background:var(--bad);color:var(--panel)}.sev.HIGH{background:var(--bad-bg);color:var(--bad)}
+.sev.MEDIUM{background:var(--warn-bg);color:var(--warn)}.sev.LOW{background:var(--panel2);color:var(--muted)}
+.find code{font-family:var(--f-mono);font-size:10.5px;overflow-wrap:anywhere}
+
+/* transcript */
+.feed{max-height:560px;overflow-y:auto;display:flex;flex-direction:column;gap:2px;scroll-behavior:smooth}
+.row{display:grid;grid-template-columns:62px 30px minmax(0,1fr);gap:8px;padding:6px 4px;border-radius:5px;align-items:start}
+.row.fresh{animation:fadein .35s ease-out}
+@keyframes fadein{from{background:var(--info-bg)}to{background:transparent}}
+.row .ts{font-family:var(--f-mono);font-size:11px;color:var(--muted);padding-top:3px}
+.who{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-family:var(--f-display);font-weight:700;font-size:9.5px;color:var(--panel);background:var(--c,var(--muted))}
+.row .body{min-width:0;display:flex;flex-direction:column;gap:4px}
+.row .body p{margin:0}
+.row .body .ar{font-size:13px;color:var(--muted)}
+.term{background:var(--term-bg);color:var(--term-ink);font-family:var(--f-mono);font-size:11.5px;border-radius:5px;padding:8px 10px;overflow-x:auto;white-space:pre;line-height:1.55}
+.term .p{color:var(--term-dim)}.term .okc{color:var(--term-ok)}.term .badc{color:var(--term-bad)}
+.trigger{border:1px solid var(--line);border-radius:6px;padding:9px 11px;background:var(--panel2);display:flex;flex-direction:column;gap:3px}
+.trigger .ch{font-size:10.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+.trigger .tt{font-weight:600}
+.trigger .file{font-family:var(--f-mono);font-size:11px;color:var(--muted);overflow-wrap:anywhere}
+.kv{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:6px}
+.kv div{border:1px solid var(--line2);border-radius:5px;padding:5px 8px;background:var(--panel)}
+.kv b{display:block;font-family:var(--f-mono);font-size:13px;font-weight:500}
+.kv span{font-size:10.5px;color:var(--muted)}
+.vrow{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.warnline{color:var(--warn);font-weight:500}
+
+/* engine column */
+.cond{display:grid;grid-template-columns:18px 1fr;gap:8px;font-size:12.5px;padding:4px 0;border-bottom:1px dashed var(--line2)}
+.cond:last-child{border-bottom:0}
+.ci{width:16px;height:16px;border-radius:3px;display:grid;place-items:center;font-size:11px;font-weight:700;margin-top:1px}
+.ci.ok{background:var(--ok);color:var(--panel)}.ci.fail{background:var(--bad);color:var(--panel)}.ci.wait{border:1.5px solid var(--muted);color:var(--muted)}
+.cond .note{font-family:var(--f-mono);font-size:10.5px;color:var(--muted)}
+.gate-state{font-family:var(--f-display);font-weight:700;font-size:15px;letter-spacing:.06em;padding:2px 8px;border-radius:4px}
+.gate-state.BLOCKED{background:var(--bad-bg);color:var(--bad)}.gate-state.READY{background:var(--ok-bg);color:var(--ok)}.gate-state.PASSED{background:var(--ok);color:var(--panel)}
+.stamp{border:2px solid currentColor;border-radius:6px;padding:8px 10px;display:flex;flex-direction:column;gap:4px}
+.stamp.allow{color:var(--ok);background:var(--ok-bg)}.stamp.deny{color:var(--bad);background:var(--bad-bg)}
+.stamp .big{font-family:var(--f-display);font-weight:700;font-size:26px;letter-spacing:.08em;line-height:1}
+.stamp .act{font-family:var(--f-mono);font-size:12px;color:var(--ink);overflow-wrap:anywhere}
+.stamp ul{margin:0;padding-left:16px;color:var(--ink);font-size:12px}
+.chain{display:flex;flex-direction:column;gap:0}
+.blk{display:grid;grid-template-columns:40px 1fr;gap:8px;padding:6px 0;position:relative;font-size:12px}
+.blk::before{content:"";position:absolute;left:19px;top:0;bottom:0;width:1.5px;background:var(--line)}
+.blk .sq{position:relative;z-index:1;width:40px;font-family:var(--f-mono);font-size:10.5px;text-align:center;border:1px solid var(--line);border-radius:4px;background:var(--panel);padding:2px 0;align-self:start}
+.blk .ty{font-family:var(--f-mono);font-size:11px;font-weight:500}
+.blk .lb{color:var(--muted);font-size:11.5px;overflow-wrap:anywhere}
+.blk .hs{font-family:var(--f-mono);font-size:10px;color:var(--muted)}
+.blk.bad .sq{border-color:var(--bad);color:var(--bad);background:var(--bad-bg)}
+.blk.bad .ty,.blk.bad .hs{color:var(--bad)}
+.blk.new .sq{border-color:var(--accent);color:var(--accent)}
+.vote{border:2px solid var(--accent);border-radius:8px;background:var(--info-bg)}
+.vote .panel-h{border-bottom-color:color-mix(in srgb,var(--accent) 30%,transparent)}
+.member{display:grid;grid-template-columns:1fr auto auto;gap:6px;align-items:center;padding:6px 0;border-bottom:1px solid color-mix(in srgb,var(--accent) 15%,transparent)}
+.member:last-child{border-bottom:0}
+.member .r{font-size:12.5px;font-weight:500}.member .r .ar{font-size:11.5px;color:var(--muted);text-align:left;display:block}
+.member .req{font-size:10px;color:var(--accent);font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+.vbtn{border:1px solid var(--line);background:var(--panel);border-radius:4px;padding:4px 9px;font-size:12px;min-height:30px}
+.vbtn.ap:hover{border-color:var(--ok);color:var(--ok)}.vbtn.rj:hover{border-color:var(--bad);color:var(--bad)}
+.voted{font-family:var(--f-mono);font-size:11px;font-weight:500;padding:3px 8px;border-radius:4px}
+.voted.APPROVE{background:var(--ok-bg);color:var(--ok)}.voted.REJECT{background:var(--bad-bg);color:var(--bad)}
+.pin{display:inline-flex;gap:4px}.pin i{width:7px;height:7px;border-radius:50%;background:var(--accent);animation:pin .7s steps(1) forwards;opacity:0}
+.pin i:nth-child(2){animation-delay:.08s}.pin i:nth-child(3){animation-delay:.16s}.pin i:nth-child(4){animation-delay:.24s}.pin i:nth-child(5){animation-delay:.32s}.pin i:nth-child(6){animation-delay:.4s}
+@keyframes pin{to{opacity:1}}
+.draft{border:1px solid var(--line2);border-radius:6px;overflow:hidden}
+.draft-h{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:6px 9px;background:var(--panel2);font-size:11.5px}
+.draft-h b{font-weight:600}
+.draft pre{margin:0;padding:8px 9px;font-family:var(--f-body);font-size:12px;white-space:pre-wrap;overflow-wrap:anywhere}
+.draft .ar{padding:0 9px 8px;font-size:12.5px}
+.draft .ft{font-family:var(--f-mono);font-size:10px;color:var(--muted);padding:0 9px 7px}
+
+/* packet */
+.packet{border:1px solid var(--ink);border-radius:8px;background:var(--panel);box-shadow:var(--shadow)}
+.packet-h{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:baseline;justify-content:space-between;padding:14px 18px;border-bottom:2px solid var(--ink)}
+.packet-h h2{margin:0;font-family:var(--f-display);font-size:22px;font-weight:700;letter-spacing:.02em}
+.packet-b{padding:14px 18px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px}
+@media (max-width:700px){.packet-b{grid-template-columns:minmax(0,1fr)}}
+.packet-b section{display:flex;flex-direction:column;gap:6px;min-width:0}
+.packet-b h3{margin:0;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.hard{grid-column:1 / -1;border-left:4px solid var(--bad);padding:8px 12px;background:var(--bad-bg);border-radius:0 6px 6px 0;display:grid;gap:4px}
+.hard p{margin:0}.hard .ar{font-size:15px;font-weight:500}
+.packet table{width:100%;border-collapse:collapse;font-size:12px}
+.packet td,.packet th{text-align:left;padding:5px 6px;border-bottom:1px solid var(--line2);vertical-align:top}
+.packet th{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.cmds{grid-column:1 / -1}
+.cmds ol{margin:0;padding-left:18px;display:grid;gap:4px;font-size:12.5px}
+.empty{color:var(--muted);font-size:12.5px;padding:6px 0}
+.howto{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+@media (max-width:700px){.howto{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+.howto div{font-size:12px;color:var(--muted)}
+.howto b{display:block;font-family:var(--f-display);font-size:15px;color:var(--ink);font-weight:600;letter-spacing:.02em}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/htm@3.1.1/dist/htm.umd.js"></script>
+<script>
+"use strict";
+const { useState, useEffect, useMemo, useRef } = React;
+const html = htm.bind(React.createElement);
+
+/* ---------------------------------------------------------------- SHA-256 (sync, used for the simulated event chain) */
+const K256 = new Uint32Array([0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2]);
+function sha256(str){
+  const msg = new TextEncoder().encode(str), l = msg.length, n = ((l + 9 + 63) >> 6) << 6;
+  const buf = new Uint8Array(n); buf.set(msg); buf[l] = 0x80;
+  const dv = new DataView(buf.buffer);
+  dv.setUint32(n - 4, (l * 8) >>> 0); dv.setUint32(n - 8, Math.floor(l / 0x20000000));
+  let H = [0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19];
+  const W = new Uint32Array(64), r = (x, k) => (x >>> k) | (x << (32 - k));
+  for (let i = 0; i < n; i += 64){
+    for (let t = 0; t < 16; t++) W[t] = dv.getUint32(i + t * 4);
+    for (let t = 16; t < 64; t++){
+      const s0 = r(W[t-15],7) ^ r(W[t-15],18) ^ (W[t-15] >>> 3), s1 = r(W[t-2],17) ^ r(W[t-2],19) ^ (W[t-2] >>> 10);
+      W[t] = (W[t-16] + s0 + W[t-7] + s1) >>> 0;
+    }
+    let [a,b,c,d,e,f,g,h] = H;
+    for (let t = 0; t < 64; t++){
+      const t1 = (h + (r(e,6) ^ r(e,11) ^ r(e,25)) + ((e & f) ^ (~e & g)) + K256[t] + W[t]) >>> 0;
+      const t2 = ((r(a,2) ^ r(a,13) ^ r(a,22)) + ((a & b) ^ (a & c) ^ (b & c))) >>> 0;
+      h = g; g = f; f = e; e = (d + t1) >>> 0; d = c; c = b; b = a; a = (t1 + t2) >>> 0;
+    }
+    H = H.map((x, k) => (x + [a,b,c,d,e,f,g,h][k]) >>> 0);
+  }
+  return H.map(x => x.toString(16).padStart(8, "0")).join("");
+}
+
+/* ---------------------------------------------------------------- cast */
+const AGENTS = {
+  tech:  { id:"tech-spec-auditor",  code:"TECH",  en:"Technical Authority",  ar:"السلطة الفنية",          depts:"Sales · Production · Maintenance", c:"var(--tech)" },
+  legal: { id:"legal-counsel",      code:"LEGAL", en:"Legal and Risk Gate",  ar:"المستشار القانوني",      depts:"Contracts · Guarantees · Claims",   c:"var(--legal)" },
+  fin:   { id:"fin-acct-controller",code:"FIN",   en:"Capital and Ledger",   ar:"المالية والمحاسبة",      depts:"Finance · Accounting",              c:"var(--fin)" },
+  ops:   { id:"ops-logistics-coord",code:"OPS",   en:"Civil and Supply Chain",ar:"الإنشاءات واللوجستيات", depts:"Civil · Logistics · Warehouse",     c:"var(--ops)" },
+  hr:    { id:"hr-planner",         code:"HR",    en:"Human Capital",        ar:"الموارد البشرية",        depts:"Hiring · Training",                 c:"var(--hr)" },
+};
+const AG_KEYS = ["tech","legal","fin","ops","hr"];
+const WHO = { exec:{code:"EX",c:"var(--exec)",en:"Board_Exec"}, engine:{code:"EN",c:"var(--info)",en:"Engine"}, human:{code:"HU",c:"var(--accent)",en:"Board member"}, ...AGENTS };
+const ROLES = {
+  chair:{en:"Chair",ar:"رئيس المجلس"}, finance_director:{en:"Finance Director",ar:"المدير المالي"},
+  technical_director:{en:"Technical Director",ar:"المدير الفني"}, operations_director:{en:"Operations Director",ar:"مدير العمليات"},
+  legal_advisor:{en:"Legal Advisor",ar:"المستشار القانوني"}, hr_director:{en:"HR Director",ar:"مدير الموارد البشرية"},
+  board_member:{en:"Board Member",ar:"عضو مجلس"},
+};
+const GATES = [
+  ["G1","Spec and localization lock","تثبيت المواصفات والتوطين"],
+  ["G2","Contract and payment instrument","العقد والأداة المالية"],
+  ["G3","Structural handshake","التسليم الإنشائي"],
+  ["G4","Port, warehouse, civil readiness","الاستلام وجاهزية الموقع"],
+  ["G5","Installation and training","التركيب والتدريب"],
+  ["G6","Commissioning and trial run","التشغيل التجريبي"],
+];
+
+/* ---------------------------------------------------------------- step helpers */
+const say = (who, en, ar, phase) => ({ t:"say", who, en, ar, phase });
+const cmd = (c, out, ok = true) => ({ t:"cmd", cmd:c, out, ok });
+const find = (who, sev, code, en, ref) => ({ t:"find", who, sev, code, en, ref });
+const verdict = (who, status, gate, subject, en, ar, conds) => ({ t:"verdict", who, status, gate, subject, en, ar, conds });
+const gate = (g, conds) => ({ t:"gate", gate:g, conds });
+const auth = (action, ok, reasons, ref) => ({ t:"auth", action, ok, reasons: reasons || [], ref });
+
+/* ---------------------------------------------------------------- scenarios (example data) */
+const SCENARIOS = [
+{
+  id:"rfp", g:"G1", title:"Vendor quote meets the spec gate", title_ar:"عرض المورد أمام بوابة المواصفات",
+  tags:["Agent veto","Press sizing","Syrian serviceability"], start:"2026-11-04T09:12:00", seq:14, passed:[],
+  steps:[
+    { t:"trigger", ch:"SharePoint", from:"Technical Director", title:"Vendor A quotation, 1800 US ton extrusion line", body:"Uploaded to Board / Vendors / Vendor A. 38 pages. EUR 3,450,000 FCA Ningbo.", file:"specs/quotes/20261104_vendorA_1800t.pdf" },
+    say("exec","New document on the equipment track. It belongs to gate G1, subject rfp_spec. Reading engine state before anything else.","وثيقة جديدة على مسار المعدات تخص البوابة G1. أقرأ حالة المحرك قبل أي خطوة."),
+    cmd("python3 engine/board.py status --brief",["current_gate=G1  events=13  chain_head=7c1e04b9a2d3","[ ] G1 Specification and Localization Lock  -> BLOCKED","    - verdict tech-spec-auditor/G1/rfp_spec missing","    - verdict fin-acct-controller/G1/capex_budget missing","    - approval `rfp_lock` has 0/2 eligible APPROVE votes"]),
+    say("exec","Importing the quotation into the repository so the verdicts can bind to its hash. A SharePoint link proves nothing because the file behind it can change."),
+    cmd("git add specs/quotes && git commit -m \"Import Vendor A quotation\"",["[main 3f9ac21] Import Vendor A quotation"," 2 files changed (quotation + .source.md sidecar)"]),
+    { t:"dispatch", to:["tech","fin"], gate:"G1", subjects:{ tech:"rfp_spec", fin:"capex_budget" }, files:["specs/rfp_spec_v1.md","specs/quotes/20261104_vendorA_1800t.pdf","state/syrian_market_constraints.json","specs/capex_budget.md"] },
+    say("tech","Reading the locked RFP, quotation sections 3 to 9, and the Syrian electrical brand list.",null,"reading"),
+    say("fin","Reading capex_budget.md and the quotation price schedule.",null,"reading"),
+    { t:"calc", who:"tech", cmd:"press_calc.py --force-usTon 1800 --container-mm 178 --billet-dia-mm 170 --billet-len-mm 650 --profile-area-mm2 450 --holes 2 --ram-mm-s 8 --alloy 6063", out:[["16.0 MN","Press force"],["643 MPa","Specific pressure"],["27.6","Extrusion ratio"],["13.2 m/min","Exit speed"],["6,500 t/yr","Net output"]] },
+    say("tech","643 MPa clears the 550 MPa floor for 6063. Output of 6,500 t/yr covers the 6,000 t/yr market target with 8% headroom."),
+    say("fin","Equipment EUR 3.45M, freight and clearing USD 410k, substation USD 620k. Contingency is 10% on equipment and 15% on civil works. Both floors are met."),
+    say("tech","Ageing oven: 2 batches of 9 t, 3 cycles a day, 54 t/day against a press peak of 31 t/day. The line is balanced."),
+    find("tech","CRITICAL","UNSERVICEABLE_COMPONENT","Press PLC is the vendor’s own VC-900 controller. Not on the Syrian brand list. No local stock, no local repair.","quote §4.2"),
+    find("fin","HIGH","UNBUDGETED_BANK_COSTS","L/C confirmation and guarantee commissions are missing. Estimate USD 48,000.","capex_budget.md:41"),
+    find("tech","CRITICAL","MISSING_PLC_SOURCE","PLC and HMI source code are not listed as deliverables.","quote §9"),
+    find("tech","MEDIUM","PUMP_REBUILD_UNVERIFIED","Main pumps are Rexroth A4VSO. Local rebuild is unverified. Add one spare pump to the 24 month BOM.","quote §4.5"),
+    verdict("fin","APPROVED","G1","capex_budget","The budget holds at the obtainable FX rate, on condition the USD 48k bank costs are added.","الميزانية متماسكة بسعر الصرف المتاح، بشرط إضافة تكاليف البنك المقدرة بـ 48 ألف دولار.",["Add USD 48k bank and guarantee costs"]),
+    verdict("tech","VETOED","G1","rfp_spec","Sizing is right. Serviceability is not: a proprietary PLC with no source code would stop the press for weeks on any controller fault.","التحجيم صحيح لكن الصيانة غير ممكنة محلياً: وحدة تحكم خاصة بلا شيفرة مصدرية تعني توقف المكبس لأسابيع عند أي عطل."),
+    gate("G1",[["Syrian constraints verified on 2026-10-22","ok"],["tech-spec-auditor / rfp_spec","fail","VETOED"],["fin-acct-controller / capex_budget","ok","APPROVED with 1 condition"],["Approval rfp_lock: 0 of 2, technical director required","wait"]]),
+    say("exec","The vendor wants the RFP released to two competitors for comparison. Asking the engine first."),
+    auth("issue_rfp_to_vendors", false, ["gate G1 not passed"]),
+    { t:"draft", ch:"Outlook", kind:"status_update", to:"Vendor A, sales engineering", subject:"Clarifications required on quotation Q-1800-114", text:"1. Replace the VC-900 controller with Siemens S7-1500 or Schneider Modicon M580.\n2. List PLC and HMI source code, offline licences and parameter lists as contract deliverables.\n3. Quote one spare A4VSO main pump." },
+    { t:"packet", gate:"G1", subject:"rfp_spec",
+      hard_ar:"أرخص وحدة تحكم في هذا العرض هي الأغلى في التشغيل: كل عطل سينتظر طائرة من الخارج.",
+      hard_en:"The cheapest controller in this quote is the most expensive one to own. Every fault would wait for a flight from abroad.",
+      dec_ar:"إعادة العرض إلى المورد مع تعديلين إلزاميين. لا تصويت للمجلس الآن.", dec_en:"Return the quote with two mandatory changes. No board vote yet.",
+      risk:"No effect on the critical path yet. Each week of vendor delay moves the contract, and the foundation drawings behind it, by one week.",
+      next:["Vendor A revises §4.2 (PLC brand) and §9 (deliverables)","tech-spec-auditor re-reviews the revision","Two board votes on rfp_lock, technical director included"] },
+  ]
+},
+{
+  id:"contract", g:"G2", title:"Contract veto, redline, re-review, board vote", title_ar:"فيتو على العقد ثم إعادة مراجعة وتصويت",
+  tags:["Stale verdicts","Your vote","Quorum 3"], start:"2026-11-12T10:05:00", seq:22, passed:["G1"],
+  steps:[
+    { t:"trigger", ch:"Outlook", from:"Vendor A, legal department", title:"Supply contract draft v1 for signature", body:"Please find attached the supply contract for the 1800 US ton line. We kindly ask for signature by 30 November.", file:"contracts/vendorA/20261112_contract_v1.pdf" },
+    say("exec","Gate G2 has three subjects. Each goes to the agent that owns it. They review in isolation and never see each other’s work.","البوابة G2 لها ثلاثة مواضيع. كل وكيل يراجع موضوعه بمعزل عن الآخرين."),
+    { t:"dispatch", to:["legal","fin","tech"], gate:"G2", subjects:{ legal:"equipment_contract", fin:"payment_instrument", tech:"contract_technical_annex" }, files:["contracts/vendorA/20261112_contract_v1.pdf","contracts/clause_library.md","specs/rfp_spec_v1.1.md"] },
+    say("legal","Checking 25 mandatory clauses from the library, section A.",null,"reading"),
+    say("tech","Comparing technical annex B line by line against rfp_spec_v1.1.",null,"reading"),
+    say("fin","Matching the payment schedule against rails verified on 2026-10-22.",null,"reading"),
+    say("legal","Clause matrix: 21 PRESENT, 2 WEAK, 2 MISSING."),
+    find("legal","CRITICAL","MISSING_FOUNDATION_DWG_LD","No delivery date and no penalty for the foundation drawings. Civil works cannot start without them.","EQ-03"),
+    say("tech","Annex B now names Siemens S7-1500 and lists PLC source code. Matches the locked spec."),
+    find("legal","HIGH","WEAK_SANCTIONS_CLAUSE","If an export licence fails, we carry the loss. No substitution right and no refund of the advance.","EQ-18 / §14.2"),
+    say("fin","Advance 30% = EUR 1,035,000, covered 100% by an advance payment guarantee from Bank Z. Shipment 60% by L/C, confirmed."),
+    find("legal","MEDIUM","LD_CAP_LOW","Delay damages are capped at 5%. The library minimum is 10%.","EQ-04"),
+    verdict("tech","APPROVED","G2","contract_technical_annex","Annex B matches the locked spec, including the PLC brand and the source code deliverable.","الملحق الفني مطابق للمواصفات المعتمدة بما فيها علامة PLC وتسليم الشيفرة المصدرية."),
+    verdict("fin","APPROVED","G2","payment_instrument","Payment rails are verified and the advance is fully guaranteed.","قنوات الدفع موثقة والدفعة المقدمة مغطاة بالكامل بضمان."),
+    verdict("legal","VETOED","G2","equipment_contract","Without a deadline for foundation drawings, the vendor controls our critical path at no cost to them.","بدون موعد ملزم لمخططات الأساسات يتحكم المورد بمسارنا الحرج دون أي كلفة عليه."),
+    gate("G2",[["G1 passed on 2026-11-10","ok"],["tech-spec-auditor / contract_technical_annex","ok","APPROVED"],["legal-counsel / equipment_contract","fail","VETOED"],["fin-acct-controller / payment_instrument","ok","APPROVED"],["Approval contract_signing: 0 of 3","wait"]]),
+    { t:"draft", ch:"Outlook", kind:"status_update", to:"Vendor A, legal department", subject:"Contract v1: three required amendments", text:"[EQ-03] Seller delivers certified foundation drawings and load data within 6 weeks of the Effective Date. 0.5% of the Contract Price per week of delay, cap 5%.\n[EQ-18] Substitution with equivalent serviceable brands at no cost. Buyer may terminate and recover the advance if delivery is blocked.\n[EQ-04] Delay damages cap raised to 10%." },
+    say("exec","Nothing moves on G2 until a new draft arrives. Waiting for the counterparty."),
+    { t:"trigger", ch:"Outlook", from:"Vendor A, legal department", title:"Contract v2 with your amendments", body:"We accept EQ-03 and EQ-18. Cap on delay damages agreed at 10%.", file:"contracts/vendorA/20261118_contract_v2.pdf", dt:518400 },
+    { t:"stale", file:"contracts/vendorA/20261112_contract_v1.pdf → v2", agents:["legal","fin","tech"] },
+    say("exec","Stale means dead. All three verdicts were bound to v1. Re-dispatching all three on v2, even the two that approved.","الحكم القديم ميت. أعيد إرسال الوثيقة الجديدة للوكلاء الثلاثة حتى من وافق سابقاً."),
+    { t:"dispatch", to:["legal","fin","tech"], gate:"G2", subjects:{ legal:"equipment_contract", fin:"payment_instrument", tech:"contract_technical_annex" }, files:["contracts/vendorA/20261118_contract_v2.pdf"] },
+    say("legal","EQ-03 present: drawings in 6 weeks, 0.5% per week, cap 5%. EQ-18 present with substitution and refund.",null,"analyzing"),
+    say("fin","Payment schedule unchanged from v1. Guarantee wording identical.",null,"analyzing"),
+    say("tech","Annex B unchanged. No new technical terms introduced in v2.",null,"analyzing"),
+    verdict("legal","APPROVED","G2","equipment_contract","All 25 mandatory clauses present. Risk score 6 of 100.","البنود الإلزامية الـ25 موجودة. درجة المخاطر 6 من 100."),
+    verdict("fin","APPROVED","G2","payment_instrument","Unchanged and still valid against v2.","دون تغيير وما زال صالحاً على النسخة الثانية."),
+    verdict("tech","APPROVED","G2","contract_technical_annex","Unchanged and still valid against v2.","دون تغيير وما زال صالحاً على النسخة الثانية."),
+    gate("G2",[["Three verdicts APPROVED on v2","ok"],["Approval contract_signing: chair and legal advisor required","wait"],["Approval lc_issuance","wait"],["Attestation contract_signed","wait"]]),
+    say("exec","Agents cannot sign. Handing the vote to the board. Each member votes in their own terminal with a PIN."),
+    { t:"human", key:"contract_signing", label:"Sign the equipment supply contract", label_ar:"توقيع عقد توريد خط الإنتاج", quorum:3, required:["chair","legal_advisor"], eligible:["chair","legal_advisor","technical_director","finance_director","board_member"] },
+    auth("sign_equipment_contract", true),
+    { t:"packet", gate:"G2", subject:"equipment_contract",
+      hard_ar:"وفّرنا البند الأهم بكلفة صفر: موعد ملزم لمخططات الأساسات. بدونه كان المورد سيتحكم بتاريخ التشغيل.",
+      hard_en:"The most valuable clause cost nothing to win: a binding date for the foundation drawings. Without it the vendor would have set our commissioning date.",
+      dec_ar:"العقد جاهز للتوقيع. الخطوة التالية: فتح الاعتماد بعد تصويت المدير المالي والرئيس.", dec_en:"Contract cleared for signature. Next: L/C issuance after the finance director and chair vote.",
+      risk:"Foundation drawings are now due 6 weeks after signature, so civil works can start in week 7.",
+      next:["Chair signs; legal advisor runs: attest contract_signed --evidence contracts/vendorA/signed.pdf","Vote lc_issuance (chair + finance director)","Authorize issue_lc_or_advance_payment, then journal ADVANCE_TO_SUPPLIER"] },
+  ],
+  onReject:[
+    gate("G2",[["Three verdicts APPROVED on v2","ok"],["Approval contract_signing","fail","REJECTED by a board member"]]),
+    auth("sign_equipment_contract", false, ["approval `contract_signing` REJECTED"]),
+    { t:"packet", gate:"G2", subject:"equipment_contract", rejected:true,
+      hard_ar:"رفض عضو واحد يكفي لوقف التوقيع. هذا مقصود: الموافقة تحتاج نصاباً، والرفض لا يحتاج.",
+      hard_en:"One rejection is enough to stop the signature. That is deliberate: approval needs a quorum, a veto does not.",
+      dec_ar:"التوقيع موقوف حتى يغيّر العضو صوته أو يتغير العقد.", dec_en:"Signature blocked until the member changes the vote or the contract changes.",
+      risk:"Each week of delay moves the foundation drawings and the civil track by one week.",
+      next:["Record the reason for rejection in the minutes","If the contract changes, all three verdicts go stale and are re-run"] },
+  ]
+},
+{
+  id:"pour", g:"G3", title:"Site wants to pour before the drawings", title_ar:"المقاول يريد الصب قبل وصول المخططات",
+  tags:["Authorize before acting","Critical path","Telegram"], start:"2026-11-26T07:40:00", seq:37, passed:["G1","G2"],
+  steps:[
+    { t:"trigger", ch:"Telegram", from:"Civil contractor, site group", title:"Concrete plant booked for Thursday", body_ar:"انتهينا من الحفر. محطة البيتون محجوزة يوم الخميس. سنصب أساسات المكبس الخميس ما لم تقولوا لا.", body:"Excavation done. Concrete plant booked Thursday. We pour the press foundations Thursday unless you say no." },
+    say("exec","A Telegram message is an unverified field report. But it asks for an action, so the engine decides first.","رسالة تلغرام بلاغ ميداني غير موثق. لكنها تطلب إجراءً، لذلك القرار للمحرك أولاً."),
+    auth("pour_foundations", false, ["gate G3 not passed","attestation `foundation_blueprints_received` missing","verdict tech-spec-auditor/G3/foundation_blueprints missing"]),
+    { t:"dispatch", to:["tech","ops"], gate:"OPS", subjects:{ tech:"pour_request:20261126", ops:"pour_request:20261126" }, files:["contracts/vendorA/signed_contract.pdf","specs/schedule.csv","site/20261125_excavation_report.pdf"] },
+    say("tech","Contract §7.3: vendor drawings due 2026-12-02. Today is 2026-11-26. The vendor is not late.",null,"analyzing"),
+    say("ops","Running the critical path with the current schedule.",null,"analyzing"),
+    { t:"calc", who:"ops", cmd:"cpm.py specs/schedule.csv --start 2026-11-10 --merge-task SITE_READY", out:[["MANUFACTURE","Merge driver"],["21 days","Civil track float"],["2027-03-22","Site ready"],["2027-04-12","Commissioning"]] },
+    find("tech","CRITICAL","POUR_WITHOUT_DRAWINGS","Anchor bolt layout, pit depths and dynamic loads are unknown. A mismatch means breaking out and re-pouring.","EQ-03, CV-01"),
+    say("ops","Equipment manufacture drives the merge date. The civil track has 21 days of float. Waiting 6 days for the drawings costs zero days on commissioning."),
+    find("ops","LOW","BOOKING_FEE","Cancelling Thursday’s concrete plant booking costs about USD 1,800.","site/20261125_excavation_report.pdf"),
+    find("ops","HIGH","REWORK_EXPOSURE","Break-out and re-pour if the layout differs: 3 to 5 weeks and USD 60,000 to 90,000 (estimate).","CV-04"),
+    verdict("tech","VETOED","OPS","pour_request:20261126","No pour without certified drawings. They are due in 6 days.","لا صب قبل المخططات المعتمدة. موعدها بعد 6 أيام."),
+    verdict("ops","VETOED","OPS","pour_request:20261126","Waiting costs USD 1,800 and no schedule days. Pouring risks up to USD 90,000 and 5 weeks.","الانتظار يكلف 1800 دولار ولا يؤخر الجدول. الصب الآن يعرضنا لخسارة حتى 90 ألف دولار و5 أسابيع."),
+    { t:"draft", ch:"Telegram", kind:"gate_alert", to:"Site group", text_ar:"لا يُسمح بصب أساسات المكبس قبل وصول المخططات المعتمدة من المورد (موعدها 2026-12-02). يرجى إلغاء حجز الخميس. أعمال الهنغار مستمرة.", text:"No pour of press foundations before the vendor’s certified drawings (due 2026-12-02). Please cancel Thursday’s booking. Hangar work continues." },
+    { t:"packet", gate:"G3", subject:"pour_request:20261126",
+      hard_ar:"الصب يوم الخميس لا يوفر يوماً واحداً: المسار المدني لديه 21 يوماً من الفائض. كل ما يفعله هو المخاطرة بتكسير الخرسانة.",
+      hard_en:"Pouring Thursday saves no days. The civil track has 21 days of float. All it buys is the risk of breaking out concrete.",
+      dec_ar:"رفض الصب. إلغاء الحجز بكلفة 1800 دولار. متابعة المورد على موعد 2026-12-02.", dec_en:"Pour refused. Cancel the booking at USD 1,800. Hold the vendor to 2026-12-02.",
+      risk:"If drawings slip past 2026-12-23, float is gone and every further day moves commissioning.",
+      next:["A human sends the Telegram draft: python3 connectors/telegram_send.py outbox/telegram/…","Technical director attests foundation_blueprints_received when drawings arrive","Re-run G3 review on the drawings"] },
+  ]
+},
+{
+  id:"shipment", g:"G4", title:"Shortage at the warehouse freezes a payment", title_ar:"نقص في الشحنة يجمّد دفعة",
+  tags:["Reconciliation","Payment freeze","Claim deadline"], start:"2026-12-14T13:20:00", seq:61, passed:["G1","G2","G3"],
+  steps:[
+    { t:"trigger", ch:"Warehouse", from:"Warehouse supervisor", title:"Physical count for shipment SH1 uploaded", body:"14 × 40 ft containers from Latakia. 214 lines counted.", file:"specs/shipments/SH1_received.csv" },
+    say("exec","Counting is deterministic work. Agents do not count. The engine reconciles packing list, invoice and receipt."),
+    cmd("python3 engine/board.py reconcile --shipment SH1 --packing …_packing.csv --invoice …_invoice.csv --received …_received.csv",["RECONCILED SH1: critical receipt 99.7%, new discrepancies 2, still open 0","  CRITICAL  PV-4WRPEH10  proportional valve   packing 4  invoice 4  received 3","  MISMATCH  HB-M24x200   anchor bolt          packing 400 invoice 400 received 380","Report: reports/reconciliation_SH1_seq61.md"], false),
+    { t:"event", type:"RECONCILIATION", label:"SH1 · critical 99.7% · 2 discrepancies" },
+    { t:"trigger", ch:"Outlook", from:"Vendor A, finance", title:"Invoice INV-2026-311: milestone M3, 60% on shipment", body:"EUR 2,070,000 due under L/C presentation. Documents presented to Bank Z.", dt:3600 },
+    auth("release_milestone_payment", false, ["2 open shipment discrepancies: SH1:PV-4WRPEH10, SH1:HB-M24x200","verdict legal-counsel/OPS/payment:M3 missing","approval `payment_release:M3` has 0/2 eligible APPROVE votes"], "M3"),
+    { t:"dispatch", to:["legal","ops","fin"], gate:"OPS", subjects:{ legal:"claim:SH1", ops:"shipment:SH1", fin:"payment:M3" }, files:["reports/reconciliation_SH1_seq61.md","contracts/vendorA/signed_contract.pdf"] },
+    say("legal","EQ-24: claim notice within 30 days of receipt at site. Receipt 2026-12-14, deadline 2027-01-13.",null,"analyzing"),
+    say("ops","The missing valve sits on the main press hydraulic circuit. Without it there is no SAT.",null,"analyzing"),
+    say("fin","Under the L/C, the bank pays against documents. The documents match the invoice, not the receipt.",null,"analyzing"),
+    find("fin","HIGH","LC_PAYS_ON_DOCUMENTS","An L/C cannot be stopped for a shortage once compliant documents are presented. Our leverage is the claim and the 10% SAT milestone.","syrian-trade-finance"),
+    find("ops","MEDIUM","VALVE_LEAD_TIME","Air freight lead time 5 weeks. Merge date holds if the vendor ships by 2027-01-05 (9 days of float).","specs/schedule.csv"),
+    say("exec","Checking whether the board has a controlled action for claim notices before drafting one to the vendor."),
+    cmd("python3 engine/board.py authorize issue_claim_notice --ref SH1",["REFUSED: Unknown controlled action `issue_claim_notice`."], false),
+    find("legal","MEDIUM","RULE_GAP","No rule covers claim notices. The draft goes to the legal advisor, not to the vendor, until the board adds the action.","state/raci_gates.json"),
+    verdict("legal","APPROVED","OPS","claim:SH1","Claim is valid. Notice must be served by 2027-01-13, reserving delay damages.","المطالبة صحيحة. يجب تبليغ الإشعار قبل 2027-01-13 مع حفظ حق غرامات التأخير."),
+    verdict("ops","APPROVED","OPS","shipment:SH1","No schedule impact if the valve ships by 2027-01-05.","لا أثر على الجدول إذا شُحن الصمام قبل 2027-01-05."),
+    verdict("fin","VETOED","OPS","payment:M3","No board release while discrepancies are open. The L/C itself may still pay on documents.","لا صرف بقرار المجلس مع وجود فروقات مفتوحة. الاعتماد قد يُدفع على المستندات."),
+    { t:"draft", ch:"Outlook", kind:"status_update", to:"Legal Advisor (internal review)", subject:"Draft shortage notice SH1, deadline 2027-01-13", text:"Notice of shortage under clause 18.4. Shipment SH1, B/L LTK-26-8812. Short: 1 × PV-4WRPEH10 proportional valve, 20 × HB-M24x200 anchor bolts. Remedy: air freight replacement by 2027-01-05. All rights reserved, including delay damages." },
+    { t:"draft", ch:"Telegram", kind:"gate_alert", to:"Board group", text_ar:"الشحنة SH1: نقص صمام تناسبي حرج و20 برغي تثبيت. دفعة M3 مجمدة بقرار المجلس. آخر موعد لإشعار المطالبة 2027-01-13.", text:"SH1: one critical proportional valve and 20 anchor bolts short. Board release of M3 frozen. Claim notice deadline 2027-01-13." },
+    { t:"packet", gate:"OPS", subject:"shipment:SH1",
+      hard_ar:"الاعتماد المستندي يدفع على الورق وليس على البضاعة. تجميد الدفعة داخلياً لا يوقف البنك؛ قوتنا الحقيقية هي المطالبة ودفعة الاستلام 10%.",
+      hard_en:"An L/C pays on paper, not on goods. Our internal freeze does not stop the bank. Real leverage is the claim and the 10% SAT milestone.",
+      dec_ar:"إشعار مطالبة قبل 2027-01-13. لا صرف لأي دفعة مرحلية حتى إغلاق الفروقات.", dec_en:"Serve the claim notice before 2027-01-13. No milestone release until discrepancies close.",
+      risk:"9 days of float on the valve. After 2027-01-05 every day moves SAT.",
+      next:["Board adds controlled action issue_claim_notice (maintenance session)","Legal advisor sends the notice from Outlook","When the valve arrives: resolve-discrepancy SH1:PV-4WRPEH10 --evidence <receipt>"] },
+  ]
+},
+{
+  id:"travel", g:"G4", title:"Vendor wants experts on a plane", title_ar:"المورد يريد إرسال الخبراء الآن",
+  tags:["Expert travel lock","Idle cost","Options for the board"], start:"2027-02-08T11:00:00", seq:84, passed:["G1","G2","G3"],
+  steps:[
+    { t:"trigger", ch:"Outlook", from:"Vendor A, installation department", title:"Installation team available 2027-03-01", body:"Our 4 engineers can start on 1 March. Please send visa invitation letters by Friday.", file:"contracts/vendorA/20270208_installation_notice.msg" },
+    say("exec","Visa letters are an outbound instruction. Iron Law 3: authorize before drafting.","رسائل التأشيرة تعليمات خارجية. القاعدة الثالثة: الإذن قبل الصياغة."),
+    auth("book_expert_travel", false, ["gate G4 not passed","attestation `substation_energized` missing","approval `civil_readiness_signoff` has 0/2 eligible APPROVE votes"]),
+    gate("G4",[["Customs cleared","ok"],["All critical items received (SH1, SH2)","ok"],["Zero open discrepancies","ok"],["Foundations cured","ok"],["Hangar closed","ok"],["Substation energized","fail","utility letter: 2027-03-19"],["Approval civil_readiness_signoff","wait"]]),
+    { t:"dispatch", to:["ops","hr"], gate:"G4", subjects:{ ops:"installation_readiness", hr:"technicians_onboarded" }, files:["site/20270205_utility_letter.pdf","specs/schedule.csv","hr/onboarding_tracker.xlsx"] },
+    { t:"calc", who:"ops", cmd:"cpm.py specs/schedule.csv --start 2026-11-10 --merge-task SITE_READY", out:[["ENERGIZE","Merge driver"],["2027-03-19","Utility energization"],["2027-03-22","Site ready"],["21 days","Gap if experts land 03-01"]] },
+    say("ops","Experts arriving 2027-03-01 would sit idle for 21 days: 4 × USD 650 × 21 = USD 54,600, plus hotels USD 9,240.",null,"analyzing"),
+    say("hr","11 of 14 technicians onboarded. Both PLC technicians start 2027-03-08 and finish induction 2027-03-19.",null,"analyzing"),
+    find("ops","CRITICAL","SITE_NOT_READY","Substation energization is the merge driver. No power, no installation.","site/20270205_utility_letter.pdf"),
+    find("hr","HIGH","PLC_SHADOWING_GAP","An early start means PLC commissioning happens before our PLC technicians are on site. That knowledge leaves on the return flight.","hr/onboarding_tracker.xlsx"),
+    find("ops","MEDIUM","GENSET_OPTION","A rented 1.6 MVA generator could bring site ready to 2027-03-10. Estimate USD 38,000 a month plus diesel. Board decision.","grid_and_power"),
+    verdict("hr","VETOED","G4","technicians_onboarded","PLC coverage completes 2027-03-19. Earliest useful arrival is 2027-03-22.","تغطية فنيي PLC تكتمل في 2027-03-19. أبكر وصول مفيد هو 2027-03-22."),
+    verdict("ops","VETOED","G4","installation_readiness","Not ready. Recommended window 2027-03-22 to 2027-03-29.","الموقع غير جاهز. النافذة المقترحة من 2027-03-22 إلى 2027-03-29."),
+    { t:"options", rows:[["A","Hold experts to 2027-03-22","USD 0","None","Recommended"],["B","Rent generator, experts 2027-03-10","about USD 45,000","Genset reliability; PLC shadowing still short","Board choice"],["C","Accept 2027-03-01","USD 63,840 idle","PLC knowledge transfer lost","Rejected by agents"]] },
+    { t:"draft", ch:"Outlook", kind:"status_update", to:"Vendor A, installation department", subject:"Installation start: proposed window 2027-03-22 to 2027-03-29", text:"Thank you for the availability notice. Site energization is scheduled for 2027-03-19. Please plan arrival in the window 2027-03-22 to 2027-03-29. Visa letters will follow once site readiness is signed off." },
+    { t:"packet", gate:"G4", subject:"installation_readiness",
+      hard_ar:"السفر المبكر لا يسرّع التركيب، بل يدفع 63 ألف دولار لخبراء ينتظرون الكهرباء، ويضيع تدريب فنيي PLC.",
+      hard_en:"Flying the team early does not speed up installation. It pays USD 63,840 for experts waiting for power, and loses the PLC training.",
+      dec_ar:"إبلاغ المورد بنافذة 2027-03-22. قرار المولد المؤقت للمجلس.", dec_en:"Tell the vendor the window starts 2027-03-22. The temporary generator is the board’s call.",
+      risk:"Utility energization is now the critical path. A one week slip at the utility moves commissioning one week.",
+      next:["Operations director attests substation_energized with the utility test report","Vote civil_readiness_signoff (operations + technical)","Then authorize book_expert_travel and draft visa letters"] },
+  ]
+},
+{
+  id:"tamper", g:"G2", title:"Someone edits the event log", title_ar:"محاولة تعديل سجل الأحداث",
+  tags:["Hash chain","Git anchor","Human restore"], start:"2026-12-01T08:00:00", seq:45, passed:["G1","G2"],
+  history:[["VERDICT","tech-spec-auditor/G2/contract_technical_annex = APPROVED"],["APPROVAL","contract_signing · APPROVE · Chair"],["ACTION_DENIED","pour_foundations"],["ATTESTATION","contract_signed · Legal Advisor"],["JOURNAL_ENTRY","J00011 · ADVANCE_TO_SUPPLIER"],["VERDICT","legal-counsel/G3/civil_contract = APPROVED"]],
+  steps:[
+    { t:"trigger", ch:"SessionStart hook", from:"Claude Code", title:"New session: integrity check runs before anything else", body:"python3 engine/board.py verify" },
+    cmd("python3 engine/board.py verify",["TAMPER: event 41: content hash mismatch (tampered)","TAMPER: event 42: prev_hash does not link to event 41","TAMPER: state/events.jsonl: working copy does not extend the committed history"], false),
+    { t:"tamper", seq:41, en:"ACTION_DENIED pour_foundations  →  edited to  ACTION_AUTHORIZED" },
+    say("exec","Integrity first. No agent is dispatched while the chain is broken: any verdict recorded now would sit on a forged history.","النزاهة أولاً. لا وكيل يعمل والسلسلة مكسورة، لأن أي حكم الآن سيُبنى على تاريخ مزوّر."),
+    say("exec","Someone changed a refused pour into an authorized one. The change broke two hashes, and git still holds the true version."),
+    cmd("python3 engine/board.py authorize pour_foundations",["REFUSED: Event chain is broken. Refusing to write. Run `verify`."], false),
+    { t:"draft", ch:"Telegram", kind:"gate_alert", to:"Chair (direct)", text_ar:"تنبيه نزاهة: تم تعديل الحدث 41 في سجل المجلس محلياً (رفض الصب حُوّل إلى موافقة). المحرك متوقف عن الكتابة. المطلوب استعادة السجل من آخر نسخة مدفوعة.", text:"Integrity alert: event 41 was edited locally (a refused pour turned into an authorization). Engine refuses all writes. Restore the log from the last pushed commit." },
+    { t:"human", mode:"action", key:"restore", label:"Restore the event log from the last pushed commit", label_ar:"استعادة السجل من آخر نسخة مدفوعة", role:"chair", button:"Restore as Chair", command:"git checkout origin/main -- state/events.jsonl" },
+    cmd("python3 engine/board.py verify",["OK: 44 events and 11 journal rows verified. 0 stale verdicts."]),
+    { t:"untamper", seq:41 },
+    auth("pour_foundations", false, ["gate G3 not passed"]),
+    { t:"packet", gate:"—", subject:"integrity:events.jsonl",
+      hard_ar:"كُشف التزوير لأن السجل كان مدفوعاً إلى git أمس. لو لم يُدفع، لكان من الممكن إعادة كتابة السلسلة كاملة دون أن يكتشفها الفحص المحلي.",
+      hard_en:"The forgery was caught because the log was pushed yesterday. Without that push, a full consistent rewrite of the chain would pass the local check.",
+      dec_ar:"السجل مستعاد. موافقة الصب المزورة اختفت. مراجعة من كان لديه وصول للجهاز.", dec_en:"Log restored. The forged pour authorization is gone. Review who had access to the machine.",
+      risk:"No schedule impact. The forged authorization was never acted on.",
+      next:["Commit and push after every board session","Rotate PINs of members who used that machine","Record the incident in the minutes"] },
+  ]
+},
+{
+  id:"payment", g:"G2", title:"Milestone payment with the dual key", title_ar:"دفعة مرحلية بالمفتاح المزدوج",
+  tags:["Your vote","Journal entry","Single use authorization"], start:"2027-01-22T09:30:00", seq:56, passed:["G1","G2"],
+  steps:[
+    { t:"trigger", ch:"Outlook", from:"Finance Director", title:"Vendor A invoice INV-2027-014, milestone M2 (FAT passed)", body:"EUR 690,000, 20% of contract price. FAT protocol signed 2027-01-20.", file:"finance/20270122_INV-2027-014.pdf" },
+    say("exec","Payment workflow. First a dry run to see exactly what is missing.","مسار الدفع. أبدأ بتجربة دون تسجيل لمعرفة ما ينقص."),
+    cmd("python3 engine/board.py authorize release_milestone_payment --ref M2 --dry-run",["DENY release_milestone_payment ref=M2 (dry run, not logged)","  - verdict legal-counsel/OPS/payment:M2 missing","  - verdict fin-acct-controller/OPS/payment:M2 missing","  - approval `payment_release:M2` has 0/2 eligible APPROVE votes"], false),
+    { t:"dispatch", to:["legal","fin"], gate:"OPS", subjects:{ legal:"payment:M2", fin:"payment:M2" }, files:["finance/20270122_INV-2027-014.pdf","specs/fat/20270120_FAT_protocol_signed.pdf","contracts/vendorA/signed_contract.pdf"] },
+    say("legal","Contract §5.2: M2 is triggered by a signed FAT protocol. Signed by both parties on 2027-01-20.",null,"analyzing"),
+    say("fin","20% × EUR 3,450,000 = EUR 690,000. Invoice matches. EUR balance at Bank Y: 1,210,000.",null,"analyzing"),
+    say("legal","Performance bond valid until 2028-06-30. No open claims against Vendor A."),
+    { t:"calc", who:"fin", cmd:"journal proposal (capex-accounting-ifrs)", out:[["PAYMENT","Entry type"],["ADVANCE_TO_SUPPLIER","Classification"],["EUR 690,000","Amount"],["1.08","FX to USD"],["USD 745,200","Amount USD"]] },
+    verdict("legal","APPROVED","OPS","payment:M2","Milestone event occurred, guarantees valid, no blocking claims.","حدث المرحلة تحقق والضمانات سارية ولا مطالبات مانعة."),
+    verdict("fin","APPROVED","OPS","payment:M2","Amount, cash and classification confirmed. Goods not yet delivered, so this is an advance, not CWIP.","المبلغ والسيولة والتصنيف مؤكدة. البضاعة لم تُسلّم بعد لذا تُسجل دفعة مقدمة وليس أعمالاً قيد التنفيذ."),
+    { t:"human", key:"payment_release:M2", label:"Release milestone payment M2", label_ar:"صرف الدفعة المرحلية M2", quorum:2, required:["finance_director"], eligible:["finance_director","chair"] },
+    auth("release_milestone_payment", true, [], "M2"),
+    say("exec","Authorization logged. The human executes the wire at Bank Y. Then the journal entry consumes this authorization."),
+    { t:"journal", entry:"J00012", line:"PAYMENT · ADVANCE_TO_SUPPLIER · EUR 690,000 · USD 745,200 · ref M2" },
+    say("exec","Testing the single use rule: posting the same authorization twice."),
+    { t:"journal_dup" },
+    { t:"packet", gate:"OPS", subject:"payment:M2",
+      hard_ar:"كل دفعة تحتاج أربعة أقفال مستقلة: حكم قانوني، حكم مالي، نصاب بشري، وإذن من المحرك يُستهلك مرة واحدة. أي قفل ناقص يوقف المال.",
+      hard_en:"Every payment needs four independent locks: a legal verdict, a finance verdict, a human quorum, and a single use engine authorization. Any missing lock stops the money.",
+      dec_ar:"الدفعة M2 مصروفة ومسجلة. الإذن مستهلك ولا يمكن إعادة استخدامه.", dec_en:"M2 released and booked. The authorization is consumed and cannot be reused.",
+      risk:"None. Next milestone M3 is due on shipment documents.",
+      next:["Attach the bank MT103 to finance/","Commit and push the session"] },
+  ],
+  onReject:[
+    auth("release_milestone_payment", false, ["approval `payment_release:M2` REJECTED"], "M2"),
+    { t:"packet", gate:"OPS", subject:"payment:M2", rejected:true,
+      hard_ar:"حكمان إيجابيان من الوكلاء لا يدفعان دولاراً واحداً. القرار المالي بشري دائماً.",
+      hard_en:"Two positive agent verdicts do not move a single dollar. The money decision is always human.",
+      dec_ar:"الدفعة موقوفة بتصويت المجلس.", dec_en:"Payment stopped by board vote.",
+      risk:"Late payment may trigger vendor interest under the contract. Check §5.6.",
+      next:["Record the reason in the minutes","Notify the vendor through a reviewed Outlook draft"] },
+  ]
+},
+];
+const BY_ID = Object.fromEntries(SCENARIOS.map(s => [s.id, s]));
+
+/* ---------------------------------------------------------------- timing */
+const DUR = { trigger:1900, say:1700, cmd:1600, dispatch:1400, calc:1900, find:1500, verdict:1700, event:800, gate:1700, auth:1700, draft:1600, stale:1900, tamper:1900, untamper:900, packet:900, human:600, options:1900, journal:1500, journal_dup:1500 };
+const DT = { trigger:60, say:25, cmd:4, dispatch:6, calc:30, find:45, verdict:20, event:2, gate:3, auth:3, draft:40, stale:2, tamper:2, untamper:2, packet:30, human:240, options:20, journal:600, journal_dup:5 };
+
+function expandSteps(sc, decisions){
+  const out = [];
+  for (let i = 0; i < sc.steps.length; i++){
+    out.push(sc.steps[i]);
+    const d = decisions[i];
+    if (sc.steps[i].t === "human" && d && d.rejected && sc.onReject){ return out.concat(sc.onReject); }
+  }
+  return out;
+}
+
+function quorumMet(step, votes){
+  const appr = Object.keys(votes).filter(r => votes[r] === "APPROVE");
+  return appr.length >= step.quorum && step.required.every(r => appr.includes(r));
+}
+
+/* ---------------------------------------------------------------- replay: state = fold(steps[0..idx)) */
+function initialState(sc){
+  const hist = sc.history || [];
+  const base = sc.seq - 1 - hist.length;
+  const s0 = { events:[{ seq: base, type: "…", label: `${base} earlier events`, hash: sha256("anchor:" + sc.id), prior:true }] };
+  hist.forEach(([type, label]) => addEvent(s0, type, label));
+  const events = s0.events;
+  return { log:[], agents:Object.fromEntries(AG_KEYS.map(k => [k,{ status:"idle", thought:"", findings:[], verdict:null, subject:null, stale:false }])),
+    events, gate:null, action:null, human:null, drafts:[], packet:null, options:null, broken:false,
+    clock: new Date(sc.start + "Z").getTime(), active:new Set(), returning:{} };
+}
+function addEvent(s, type, label, payload){
+  const prev = s.events[s.events.length - 1];
+  const seq = prev.seq + 1;
+  const body = JSON.stringify({ seq, type, label, payload: payload || null, prev: prev.hash });
+  s.events = s.events.concat({ seq, type, label, hash: sha256(body), prev: prev.hash });
+  return seq;
+}
+function apply(s, step, i, decisions){
+  s.clock += (step.dt || DT[step.t] || 10) * 1000;
+  const ts = s.clock;
+  const L = (o) => { s.log = s.log.concat({ ...o, ts, i }); };
+  switch (step.t){
+    case "trigger": L({ kind:"trigger", who:"human", step }); break;
+    case "say": {
+      L({ kind:"say", who:step.who, en:step.en, ar:step.ar });
+      if (AGENTS[step.who]){ const a = s.agents[step.who]; s.agents = { ...s.agents, [step.who]:{ ...a, thought:step.en, status: step.phase || (a.status === "reading" ? "analyzing" : a.status === "idle" ? "analyzing" : a.status) } }; s.active = new Set([...s.active, step.who]); }
+      break; }
+    case "cmd": L({ kind:"cmd", who:"exec", cmd:step.cmd, out:step.out, ok:step.ok }); break;
+    case "dispatch": {
+      const ag = { ...s.agents };
+      step.to.forEach(k => { ag[k] = { status:"reading", thought:"Received task. Gate " + step.gate + ".", findings:[], verdict:null, subject:step.subjects[k], stale:false }; });
+      s.agents = ag; s.active = new Set(step.to); s.returning = {};
+      L({ kind:"dispatch", who:"exec", step }); break; }
+    case "calc": {
+      const a = s.agents[step.who]; s.agents = { ...s.agents, [step.who]:{ ...a, status:"analyzing", thought:"Running calculator: " + step.cmd.split(" ")[0] } };
+      L({ kind:"calc", who:step.who, step }); break; }
+    case "find": {
+      const a = s.agents[step.who];
+      s.agents = { ...s.agents, [step.who]:{ ...a, status:"analyzing", findings:a.findings.concat({ sev:step.sev, code:step.code, en:step.en, ref:step.ref }) } };
+      L({ kind:"find", who:step.who, step }); break; }
+    case "verdict": {
+      const a = s.agents[step.who];
+      s.agents = { ...s.agents, [step.who]:{ ...a, status:"done", verdict:step.status, thought:step.en, stale:false } };
+      const seq = addEvent(s, "VERDICT", `${AGENTS[step.who].id}/${step.gate}/${step.subject} = ${step.status}`);
+      s.returning = { ...s.returning, [step.who]: step.status };
+      L({ kind:"verdict", who:step.who, step, seq }); break; }
+    case "event": { const seq = addEvent(s, step.type, step.label); L({ kind:"event", who:"engine", step, seq }); break; }
+    case "gate": { s.gate = { gate:step.gate, conds:step.conds }; L({ kind:"gate", who:"engine", step }); break; }
+    case "auth": {
+      const seq = addEvent(s, step.ok ? "ACTION_AUTHORIZED" : "ACTION_DENIED", `${step.action}${step.ref ? " ref=" + step.ref : ""}`);
+      s.action = { ...step, seq }; L({ kind:"auth", who:"engine", step, seq }); break; }
+    case "draft": s.drafts = [{ ...step, ts }].concat(s.drafts); L({ kind:"draft", who:"exec", step }); break;
+    case "stale": {
+      const ag = { ...s.agents }; step.agents.forEach(k => { ag[k] = { ...ag[k], stale:true, status:"stale" }; });
+      s.agents = ag; s.returning = {}; L({ kind:"stale", who:"engine", step }); break; }
+    case "tamper": {
+      s.broken = true;
+      s.events = s.events.map(e => e.seq === step.seq ? { ...e, bad:true, type:"ACTION_AUTHORIZED", label:"pour_foundations (edited)" } : e.seq === step.seq + 1 ? { ...e, bad:true, label:e.label + " · prev_hash broken" } : e);
+      L({ kind:"tamper", who:"engine", step }); break; }
+    case "untamper": {
+      s.broken = false;
+      s.events = s.events.map(e => e.seq === step.seq ? { ...e, bad:false, type:"ACTION_DENIED", label:"pour_foundations (restored)" } : e.seq === step.seq + 1 ? { ...e, bad:false, label:e.label.replace(" · prev_hash broken","") } : e);
+      break; }
+    case "human": {
+      const d = decisions[i] || { votes:{} };
+      s.human = { ...step, i, votes:d.votes || {}, done:!!d.done, rejected:!!d.rejected };
+      L({ kind:"human", who:"human", step });
+      if (d.done){
+        if (step.mode === "action"){ L({ kind:"humanDone", who:"human", text:`${ROLES[step.role].en} ran: ${step.command}` }); }
+        else {
+          Object.entries(d.votes).forEach(([role, v]) => { const seq = addEvent(s, "APPROVAL", `${step.key} · ${v} · ${ROLES[role].en}`); L({ kind:"vote", who:"human", role, v, key:step.key, seq }); });
+        }
+        s.human = { ...s.human, done:true };
+      }
+      break; }
+    case "options": s.options = step.rows; L({ kind:"options", who:"exec", step }); break;
+    case "journal": { const seq = addEvent(s, "JOURNAL_ENTRY", `${step.entry} · auth seq ${s.action ? s.action.seq : "?"}`); L({ kind:"cmd", who:"exec", cmd:`python3 engine/board.py journal-add --entry-type PAYMENT --classification ADVANCE_TO_SUPPLIER --amount 690000 --currency EUR --fx-rate-to-usd 1.08 --gate OPS --ref M2 --auth-seq ${s.action ? s.action.seq : "?"}`, out:[`JOURNAL ${step.entry} ADVANCE_TO_SUPPLIER 690000 EUR (USD 745200.00) hash ${sha256(step.entry).slice(0,12)}`], ok:true }); break; }
+    case "journal_dup": L({ kind:"cmd", who:"exec", cmd:`python3 engine/board.py journal-add --entry-type PAYMENT … --auth-seq ${s.action ? s.action.seq : "?"}`, out:[`REFUSED: Authorization ${s.action ? s.action.seq : "?"} already consumed by a PAYMENT entry`], ok:false }); break;
+    case "packet": s.packet = step; s.active = new Set(); L({ kind:"packet", who:"exec", step }); break;
+  }
+}
+function replay(sc, steps, idx, decisions){
+  const s = initialState(sc);
+  for (let i = 0; i < idx && i < steps.length; i++) apply(s, steps[i], i, decisions);
+  return s;
+}
+
+/* ---------------------------------------------------------------- small components */
+const fmtTime = ms => new Date(ms).toISOString().slice(11,16);
+const fmtClock = ms => new Date(ms).toISOString().slice(0,16).replace("T"," ");
+const reduced = () => { try { return window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch(e){ return false; } };
+
+function Typer({ text, c }){
+  const [n, setN] = useState(text ? text.length : 0);
+  useEffect(() => {
+    if (!text || reduced()){ setN(text ? text.length : 0); return; }
+    setN(0); let k = 0;
+    const id = setInterval(() => { k += 3; setN(k); if (k >= text.length) clearInterval(id); }, 16);
+    return () => clearInterval(id);
+  }, [text]);
+  const typing = text && n < text.length;
+  return html`<div className="thought" style=${{ "--c":c }}>${text ? text.slice(0, n) : html`<span className="muted">Idle. Waiting for a task from Board_Exec.</span>`}${typing && html`<span className="cursor"></span>`}</div>`;
+}
+
+function Pill({ status }){
+  const label = { idle:"Idle", reading:"Reading", analyzing:"Analyzing", done:"Done", stale:"Stale" }[status] || status;
+  return html`<span className=${"pill " + status}><span className="dot"></span>${label}</span>`;
+}
+
+function Who({ k }){ const w = WHO[k] || WHO.exec; return html`<span className="who" style=${{ "--c":w.c }} title=${w.en}>${w.code}</span>`; }
+
+/* ---------------------------------------------------------------- board diagram */
+function BoardDiagram({ st }){
+  const W = 640, H = 300, hub = { x:320, y:62 }, eng = { x:560, y:62 }, hum = { x:80, y:62 };
+  const xs = [76, 198, 320, 442, 564], y = 232;
+  const busy = AG_KEYS.filter(k => ["reading","analyzing"].includes(st.agents[k].status));
+  return html`<svg viewBox=${`0 0 ${W} ${H}`} role="img" aria-label="Hub and spoke: Board_Exec dispatches to five isolated agents; engine and humans hold the decisions">
+    <defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--muted)"></path></marker></defs>
+    <line x1=${hum.x + 60} y1=${hum.y} x2=${hub.x - 78} y2=${hub.y} className=${"spoke" + (st.human && !st.human.done ? " active up" : "")}></line>
+    <line x1=${hub.x + 78} y1=${hub.y} x2=${eng.x - 60} y2=${eng.y} className=${"spoke" + (st.action ? (st.action.ok ? " ok" : " bad") : "")}></line>
+    <path d=${`M${hum.x} ${hum.y + 26} C ${hum.x} ${hum.y + 92}, ${eng.x} ${hum.y + 92}, ${eng.x} ${eng.y + 26}`} className="spoke" style=${{ opacity:.6 }} markerEnd="url(#arr)"></path>
+    <text className="halo" x=${(hum.x + eng.x) / 2} y=${hum.y + 86} textAnchor="middle" fontSize="10" fill="var(--muted)">votes and attestations go straight to the engine, with a PIN</text>
+    ${xs.slice(0,4).map((x, j) => html`<line key=${"b" + j} x1=${x + 30} y1=${y} x2=${xs[j + 1] - 30} y2=${y} className="blocker"></line>`)}
+    ${AG_KEYS.map((k, j) => {
+      const a = st.agents[k], ret = st.returning[k];
+      const cls = "spoke" + (busy.includes(k) ? " active" : ret === "APPROVED" ? " ok" : ret === "VETOED" ? " bad" : ret ? " warn" : "");
+      return html`<line key=${"s" + k} x1=${hub.x} y1=${hub.y + 34} x2=${xs[j]} y2=${y - 30} className=${cls}></line>`;
+    })}
+    <g>
+      <rect x=${hum.x - 60} y=${hum.y - 26} width="120" height="52" rx="6" className="node-ring" stroke="var(--accent)"></rect>
+      <text x=${hum.x} y=${hum.y - 4} textAnchor="middle" fontSize="13" fontWeight="600" fill="var(--ink)">Board members</text>
+      <text x=${hum.x} y=${hum.y + 13} textAnchor="middle" fontSize="10.5" fill="var(--muted)">humans · PIN</text>
+    </g>
+    <g>
+      <rect x=${hub.x - 78} y=${hub.y - 32} width="156" height="64" rx="8" fill="var(--ink)"></rect>
+      <text x=${hub.x} y=${hub.y - 6} textAnchor="middle" fontSize="15" fontWeight="600" fill="var(--panel)">Board_Exec</text>
+      <text x=${hub.x} y=${hub.y + 13} textAnchor="middle" fontSize="10.5" fill="var(--panel)" opacity=".75">orchestrator · routes only</text>
+    </g>
+    <g>
+      <rect x=${eng.x - 60} y=${eng.y - 26} width="120" height="52" rx="6" className="node-ring" stroke=${st.broken ? "var(--bad)" : "var(--info)"} strokeDasharray=${st.broken ? "4 3" : "0"}></rect>
+      <text x=${eng.x} y=${eng.y - 4} textAnchor="middle" fontSize="13" fontWeight="600" fill=${st.broken ? "var(--bad)" : "var(--ink)"}>${st.broken ? "Engine LOCKED" : "Engine"}</text>
+      <text x=${eng.x} y=${eng.y + 13} textAnchor="middle" fontSize="10.5" fill="var(--muted)">gates · hash chain</text>
+    </g>
+    ${AG_KEYS.map((k, j) => {
+      const a = st.agents[k], A = AGENTS[k], isBusy = busy.includes(k);
+      const ring = a.verdict === "APPROVED" && !a.stale ? "var(--ok)" : a.verdict === "VETOED" && !a.stale ? "var(--bad)" : a.stale ? "var(--warn)" : A.c;
+      return html`<g key=${"n" + k} className=${isBusy ? "node-busy" : ""} opacity=${a.status === "idle" ? .55 : 1}>
+        <circle cx=${xs[j]} cy=${y} r="28" className="node-ring" stroke=${ring} strokeWidth=${a.verdict ? 3 : 2}></circle>
+        <circle cx=${xs[j]} cy=${y} r="20" fill=${A.c}></circle>
+        <text x=${xs[j]} y=${y + 4} textAnchor="middle" fontSize="10" fontWeight="700" fill="var(--panel)" style=${{ fontFamily:"var(--f-display)", letterSpacing:".04em" }}>${A.code}</text>
+        <text x=${xs[j]} y=${y + 46} textAnchor="middle" fontSize="11" fill="var(--ink)">${A.en}</text>
+        <text x=${xs[j]} y=${y + 60} textAnchor="middle" fontSize="10" fill=${a.verdict ? (a.stale ? "var(--warn)" : a.verdict === "APPROVED" ? "var(--ok)" : "var(--bad)") : "var(--muted)"} fontWeight=${a.verdict ? 600 : 400}>${a.stale ? "STALE" : a.verdict || (isBusy ? a.status : "")}</text>
+      </g>`;
+    })}
+  </svg>`;
+}
+
+/* ---------------------------------------------------------------- transcript row */
+function Row({ e, fresh }){
+  const body = (() => { switch (e.kind){
+    case "trigger": { const s = e.step; return html`<div className="trigger"><span className="ch">${s.ch} · ${s.from}</span><span className="tt">${s.title}</span>${s.body_ar && html`<p className="ar">${s.body_ar}</p>`}<span className="muted">${s.body}</span>${s.file && html`<span className="file">${s.file}</span>`}</div>`; }
+    case "say": return html`<p>${e.en}</p>${e.ar && html`<p className="ar">${e.ar}</p>`}`;
+    case "cmd": return html`<div className="term"><span className="p">$ </span>${e.cmd}${"\n"}${e.out.map((l, j) => html`<span key=${j} className=${/REFUSED|TAMPER|DENY|CRITICAL/.test(l) ? "badc" : /OK|ALLOW|PASSED|JOURNAL/.test(l) ? "okc" : ""}>${l}${"\n"}</span>`)}</div>`;
+    case "dispatch": { const s = e.step; return html`<p><b>Dispatch in parallel</b> · gate ${s.gate}</p><div className="vrow">${s.to.map(k => html`<span key=${k} className="pill" style=${{ color:AGENTS[k].c, borderColor:"currentColor" }}>${AGENTS[k].code} · ${s.subjects[k]}</span>`)}</div><span className="subject">${s.files.join("  ·  ")}</span>`; }
+    case "calc": return html`<p className="mono" style=${{ fontSize:"11.5px" }}>${e.step.cmd}</p><div className="kv">${e.step.out.map(([v, k]) => html`<div key=${k}><b>${v}</b><span>${k}</span></div>`)}</div>`;
+    case "find": { const f = e.step; return html`<div className="find"><span className=${"sev " + f.sev}>${f.sev}</span><div><code>${f.code}</code> <span className="muted">${f.ref}</span><p>${f.en}</p></div></div>`; }
+    case "verdict": { const v = e.step; return html`<div className="vrow"><span className=${"pill " + v.status}>${v.status}</span><span className="subject">${AGENTS[v.who].id}/${v.gate}/${v.subject}</span><span className="subject">event ${e.seq}</span></div><p>${v.en}</p><p className="ar">${v.ar}</p>${v.conds && html`<p className="warnline">Condition: ${v.conds.join("; ")}</p>`}`; }
+    case "event": return html`<p className="mono" style=${{ fontSize:"12px" }}>event ${e.seq} · ${e.step.type} · ${e.step.label}</p>`;
+    case "gate": return html`<p><b>Gate check ${e.step.gate}:</b> ${e.step.conds.filter(c => c[1] !== "ok").length} condition(s) unmet</p>`;
+    case "auth": { const a = e.step; return html`<p><b className=${a.ok ? "" : ""} style=${{ color:a.ok ? "var(--ok)" : "var(--bad)" }}>${a.ok ? "ALLOW" : "DENY"}</b> <span className="mono">${a.action}${a.ref ? " --ref " + a.ref : ""}</span> <span className="subject">event ${e.seq}</span></p>${a.reasons.length > 0 && html`<span className="subject">${a.reasons.join(" · ")}</span>`}`; }
+    case "draft": { const d = e.step; return html`<p><b>Draft queued</b> · ${d.ch} · kind=${d.kind} · to ${d.to}. Not sent: a human sends.</p>`; }
+    case "stale": return html`<p className="warnline">Evidence changed: ${e.step.file}. ${e.step.agents.length} verdicts are now STALE and no longer count.</p>`;
+    case "tamper": return html`<p style=${{ color:"var(--bad)", fontWeight:600 }}>Chain broken at event ${e.step.seq}: ${e.step.en}</p>`;
+    case "human": return html`<p><b>Waiting for the board:</b> ${e.step.label}</p><p className="ar">${e.step.label_ar}</p>`;
+    case "humanDone": return html`<p className="mono" style=${{ fontSize:"12px" }}>${e.text}</p>`;
+    case "vote": return html`<p><span className=${"voted " + e.v}>${e.v}</span> ${ROLES[e.role].en} on <span className="mono">${e.key}</span> <span className="subject">event ${e.seq}</span></p>`;
+    case "options": return html`<p><b>Options prepared for the board</b> (see packet)</p>`;
+    case "packet": return html`<p><b>Decision packet written</b> · packets/${new Date(e.ts).toISOString().slice(0,10).replace(/-/g,"")}_${e.step.gate}_${e.step.subject.replace(/[:]/g,"-")}.md</p>`;
+    default: return null; } })();
+  return html`<div className=${"row" + (fresh ? " fresh" : "")}><span className="ts">${fmtTime(e.ts)}</span><${Who} k=${e.who} /><div className="body">${body}</div></div>`;
+}
+
+/* ---------------------------------------------------------------- vote panel */
+function VotePanel({ h, onVote }){
+  const [pin, setPin] = useState(null);
+  if (h.mode === "action"){
+    return html`<div className="vote panel"><div className="panel-h"><h2>Human action required</h2><span className="pill analyzing"><span className="dot"></span>Paused</span></div>
+      <div className="panel-b" style=${{ display:"grid", gap:"8px" }}>
+        <p style=${{ margin:0 }}>${h.label}</p><p className="ar" style=${{ margin:0 }}>${h.label_ar}</p>
+        <div className="term">$ ${h.command}</div>
+        ${h.done ? html`<span className="voted APPROVE">Done by ${ROLES[h.role].en}</span>` :
+          html`<button className="btn primary" onClick=${() => onVote(h.i, h.role, "APPROVE")}>${h.button}</button>`}
+      </div></div>`;
+  }
+  const appr = Object.values(h.votes).filter(v => v === "APPROVE").length;
+  const vote = (role, v) => { if (v === "REJECT") return onVote(h.i, role, v); setPin(role); setTimeout(() => { setPin(null); onVote(h.i, role, v); }, reduced() ? 0 : 750); };
+  return html`<div className="vote panel"><div className="panel-h"><h2>Board vote</h2>${h.done ? html`<span className=${"pill " + (h.rejected ? "VETOED" : "APPROVED")}>${h.rejected ? "Rejected" : "Quorum met"}</span>` : html`<span className="pill analyzing"><span className="dot"></span>Your turn</span>`}</div>
+    <div className="panel-b" style=${{ display:"grid", gap:"6px" }}>
+      <div><b>${h.label}</b><p className="ar" style=${{ margin:0 }}>${h.label_ar}</p></div>
+      <span className="subject">approve ${h.key} · quorum ${h.quorum} · ${appr}/${h.quorum} · required: ${h.required.map(r => ROLES[r].en).join(", ")}</span>
+      ${!h.done && html`<p className="muted" style=${{ margin:"2px 0", fontSize:"12px" }}>You play each member. In the real system each person runs the approve command in their own terminal and types a PIN. One REJECT blocks.</p>`}
+      <div>${h.eligible.map(role => html`<div className="member" key=${role}>
+        <span className="r">${ROLES[role].en}${h.required.includes(role) && html` <span className="req">required</span>`}<span className="ar">${ROLES[role].ar}</span></span>
+        ${h.votes[role] ? html`<span className=${"voted " + h.votes[role]}>${h.votes[role]}</span><span></span>` :
+          pin === role ? html`<span className="pin" aria-label="Entering PIN"><i></i><i></i><i></i><i></i><i></i><i></i></span><span></span>` :
+          h.done ? html`<span className="muted" style=${{ fontSize:"11px" }}>not needed</span><span></span>` :
+          html`<button className="vbtn ap" onClick=${() => vote(role, "APPROVE")}>Approve</button><button className="vbtn rj" onClick=${() => vote(role, "REJECT")}>Reject</button>`}
+      </div>`)}</div>
+    </div></div>`;
+}
+
+/* ---------------------------------------------------------------- packet */
+function Packet({ p, st, sc }){
+  const verdicts = AG_KEYS.filter(k => st.agents[k].verdict).map(k => [k, st.agents[k]]);
+  return html`<article className="packet" id="packet">
+    <div className="packet-h"><div><span className="label">Decision packet · حزمة القرار</span><h2>${sc.title}</h2><p className="ar" style=${{ margin:0, color:"var(--muted)" }}>${sc.title_ar}</p></div>
+      <div className="vrow"><span className="pill">${p.gate} · ${p.subject}</span>${p.rejected ? html`<span className="pill VETOED">Blocked by vote</span>` : st.action ? html`<span className=${"pill " + (st.action.ok ? "APPROVED" : "VETOED")}>${st.action.ok ? "Action allowed" : "Action denied"}</span>` : null}<span className="subject">chain head ${st.events[st.events.length - 1].hash.slice(0,12)}</span></div></div>
+    <div className="packet-b">
+      <div className="hard"><span className="label" style=${{ color:"var(--bad)" }}>Hard truth · الحقيقة الصعبة</span><p className="ar">${p.hard_ar}</p><p>${p.hard_en}</p></div>
+      <section><h3>القرار</h3><p className="ar" style=${{ margin:0 }}>${p.dec_ar}</p></section>
+      <section><h3>Decision</h3><p style=${{ margin:0 }}>${p.dec_en}</p></section>
+      <section style=${{ gridColumn:"1 / -1" }}><h3>Agent verdicts · أحكام الوكلاء</h3>
+        <div style=${{ overflowX:"auto" }}><table><thead><tr><th>Agent</th><th>Status</th><th>Key findings</th></tr></thead><tbody>
+          ${verdicts.length ? verdicts.map(([k, a]) => html`<tr key=${k}><td><b>${AGENTS[k].en}</b><br/><span className="subject">${a.subject}</span></td><td><span className=${"pill " + (a.stale ? "STALE" : a.verdict)}>${a.stale ? "STALE" : a.verdict}</span></td><td>${a.findings.length ? a.findings.map((f, j) => html`<div key=${j}><span className=${"sev " + f.sev}>${f.sev}</span> <code style=${{ fontSize:"11px" }}>${f.code}</code></div>`) : html`<span className="muted">None</span>`}</td></tr>`)
+          : html`<tr><td colSpan="3" className="muted">No agents dispatched. Integrity checks come before reviews.</td></tr>`}
+        </tbody></table></div></section>
+      ${st.options && html`<section style=${{ gridColumn:"1 / -1" }}><h3>Options for the board · الخيارات</h3><div style=${{ overflowX:"auto" }}><table><thead><tr><th></th><th>Option</th><th>Cost</th><th>Risk</th><th>Agents</th></tr></thead><tbody>${st.options.map(r => html`<tr key=${r[0]}>${r.map((c, j) => html`<td key=${j}>${j === 0 ? html`<b>${c}</b>` : c}</td>`)}</tr>`)}</tbody></table></div></section>`}
+      <section style=${{ gridColumn:"1 / -1" }}><h3>Cross track risk · مخاطر المسارين</h3><p style=${{ margin:0 }}>${p.risk}</p></section>
+      <section className="cmds"><h3>Required next actions · المطلوب</h3><ol>${p.next.map((n, j) => html`<li key=${j}>${n}</li>`)}</ol></section>
+    </div></article>`;
+}
+
+/* ---------------------------------------------------------------- app */
+function App(){
+  const [sid, setSid] = useState("rfp");
+  const [decisions, setDecisions] = useState({});
+  const sc = BY_ID[sid];
+  const steps = useMemo(() => expandSteps(sc, decisions), [sid, decisions]);
+  const [idx, setIdx] = useState(() => BY_ID.rfp.steps.length);
+  const [playing, setPlaying] = useState(false);
+  const [speed, setSpeed] = useState(1);
+  const st = useMemo(() => replay(sc, steps, idx, decisions), [sc, steps, idx, decisions]);
+  const feedRef = useRef(null);
+
+  const blocked = st.human && !st.human.done && idx > 0 && steps[idx - 1] && steps[idx - 1].t === "human";
+  const finished = idx >= steps.length;
+
+  useEffect(() => {
+    if (!playing || finished || blocked) return;
+    const next = steps[idx];
+    const id = setTimeout(() => setIdx(i => i + 1), (DUR[next.t] || 1200) / speed);
+    return () => clearTimeout(id);
+  }, [playing, idx, steps, speed, finished, blocked]);
+  useEffect(() => { if (finished) setPlaying(false); }, [finished]);
+  useEffect(() => { const f = feedRef.current; if (f) f.scrollTop = f.scrollHeight; }, [st.log.length]);
+
+  const choose = id => { setSid(id); setDecisions({}); setIdx(0); setPlaying(true); };
+  const restart = () => { setDecisions({}); setIdx(0); setPlaying(true); };
+  const onVote = (i, role, v) => setDecisions(d => {
+    const step = steps[i]; const cur = d[i] || { votes:{} };
+    if (step.mode === "action") return { ...d, [i]:{ votes:{ [role]:"APPROVE" }, done:true } };
+    const votes = { ...cur.votes, [role]:v };
+    const rejected = v === "REJECT";
+    return { ...d, [i]:{ votes, rejected, done: rejected || quorumMet(step, votes) } };
+  });
+  useEffect(() => { if (st.human && st.human.done && blocked === false && !playing && !finished && idx > 0 && steps[idx - 1].t === "human") setPlaying(true); }, [st.human && st.human.done]);
+
+  const passedRail = sc.passed;
+  const statusLine = blocked ? "Paused: the board must vote" : finished ? "Scenario complete" : playing ? "Running" : "Paused";
+
+  return html`<div>
+    <header className="top">
+      <div className="top-in">
+        <div className="brand"><h1>Extrusion Board Room</h1><span className="ar">غرفة مجلس الإدارة · محاكاة الوكلاء</span></div>
+        <span className="clock tabnum" title="Simulated clock, Asia/Damascus shown as UTC for the demo">${fmtClock(st.clock)}</span>
+        <div className="controls">
+          <span className="label" aria-live="polite">${statusLine}</span>
+          <button className="btn" onClick=${restart} title="Restart scenario">↺ Replay</button>
+          <button className="btn primary" onClick=${() => { if (finished) restart(); else setPlaying(p => !p); }} disabled=${blocked}>${playing && !finished ? "❚❚ Pause" : "▶ Play"}</button>
+          <button className="btn" onClick=${() => { setPlaying(false); setIdx(i => Math.min(i + 1, steps.length)); }} disabled=${finished || blocked}>Step ›</button>
+          <div className="seg" role="group" aria-label="Speed">${[1,2,4].map(v => html`<button key=${v} aria-pressed=${speed === v} onClick=${() => setSpeed(v)}>${v}×</button>`)}</div>
+        </div>
+      </div>
+      <div className="progress"><i style=${{ width: (100 * Math.min(idx, steps.length) / steps.length) + "%" }}></i></div>
+    </header>
+    <div className="notice">Simulation with example data. Vendor, bank and figures are representative, not real. No agents, connectors or messages are called. Hashes are real SHA-256 over the simulated events.</div>
+
+    <main className="grid">
+      <aside className="col col-left">
+        <section className="panel"><div className="panel-h"><h2>Scenarios</h2><span className="label">${SCENARIOS.length}</span></div>
+          <div className="panel-b scen-list">${SCENARIOS.map(s => html`<button key=${s.id} className="scen" aria-current=${s.id === sid} onClick=${() => choose(s.id)}>
+            <span className="g">${s.g}</span><span className="t">${s.title}</span><span className="ta">${s.title_ar}</span>
+            <span className="tags">${s.tags.map(t => html`<span key=${t} className="tag">${t}</span>`)}</span></button>`)}</div></section>
+        <section className="panel"><div className="panel-h"><h2>Gate rail</h2><span className="label">this scenario</span></div>
+          <div className="panel-b rail">${GATES.map(([g, en, ar]) => {
+            const cur = GATES.map(x => x[0]).find(x => !passedRail.includes(x));
+            const cls = passedRail.includes(g) ? "passed" : g === cur ? "current" : "locked";
+            return html`<div className="rail-row" key=${g}><span className=${"gnode " + cls}>${g}</span><span className="nm">${en}<span className="ar">${ar}</span></span></div>`; })}</div></section>
+      </aside>
+
+      <section className="col">
+        <section className="panel board"><div className="panel-h"><h2>Board room · hub and spoke</h2><span className="label">${sc.g} · ${sc.title}</span></div>
+          <div className="panel-b"><${BoardDiagram} st=${st} /><div className="legend"><span><i className="go"></i>task going out</span><span><i className="ok"></i>approved verdict back</span><span><i className="no"></i>veto back</span><span><i></i>no agent to agent channel</span></div></div></section>
+        <section className="lanes">${AG_KEYS.map(k => { const a = st.agents[k], A = AGENTS[k];
+          const busy = ["reading","analyzing"].includes(a.status);
+          return html`<article key=${k} className=${"lane " + (a.status === "idle" ? "idle" : busy ? "busy" : "")} style=${{ "--c":A.c }}>
+            <div className="lane-h"><span className="mono-badge">${A.code}</span><div style=${{ minWidth:0 }}><div className="n">${A.en}</div><div className="ar">${A.ar}</div></div></div>
+            <div className="vrow">${a.verdict ? html`<span className=${"pill " + (a.stale ? "STALE" : a.verdict)}>${a.stale ? "STALE" : a.verdict}</span>` : html`<${Pill} status=${a.status} />`}${a.subject && html`<span className="subject">${a.subject}</span>`}</div>
+            <${Typer} text=${a.thought} c=${A.c} />
+            ${a.findings.length > 0 && html`<div className="finds">${a.findings.map((f, j) => html`<div className="find" key=${j}><span className=${"sev " + f.sev}>${f.sev.slice(0,4)}</span><code>${f.code}</code></div>`)}</div>`}
+          </article>`; })}</section>
+        ${st.packet && html`<${Packet} p=${st.packet} st=${st} sc=${sc} />`}
+        <section className="panel"><div className="panel-h"><h2>Session transcript</h2><span className="label">${st.log.length} entries</span></div>
+          <div className="panel-b feed" ref=${feedRef}>${st.log.length ? st.log.map((e, j) => html`<${Row} key=${j} e=${e} fresh=${j === st.log.length - 1} />`) : html`<p className="empty">Press Play. The first inbound document or message will appear here.</p>`}</div></section>
+        <section className="panel"><div className="panel-b howto">
+          <div><b>1 · Route</b>Board_Exec reads engine state and sends each subject to the agent that owns it.</div>
+          <div><b>2 · Review</b>Agents work in isolation, read only, and return one verdict bound to file hashes.</div>
+          <div><b>3 · Decide</b>The engine checks every gate condition. Agents cannot override it.</div>
+          <div><b>4 · Approve</b>Humans vote with a PIN. Drafts wait for a human to send.</div>
+        </div></section>
+      </section>
+
+      <aside className="col">
+        ${st.human && html`<${VotePanel} h=${st.human} onVote=${onVote} />`}
+        <section className="panel"><div className="panel-h"><h2>Gate check</h2>${st.gate && html`<span className=${"gate-state " + (st.gate.conds.every(c => c[1] === "ok") ? "READY" : "BLOCKED")}>${st.gate.gate} ${st.gate.conds.every(c => c[1] === "ok") ? "READY" : "BLOCKED"}</span>`}</div>
+          <div className="panel-b">${st.gate ? st.gate.conds.map((c, j) => html`<div className="cond" key=${j}><span className=${"ci " + c[1]}>${c[1] === "ok" ? "✓" : c[1] === "fail" ? "✕" : ""}</span><div>${c[0]}${c[2] && html`<div className="note">${c[2]}</div>`}</div></div>`) : html`<p className="empty">No gate evaluated yet in this scenario.</p>`}</div></section>
+        <section className="panel"><div className="panel-h"><h2>Controlled action</h2><span className="label">authorize</span></div>
+          <div className="panel-b">${st.action ? html`<div className=${"stamp " + (st.action.ok ? "allow" : "deny")}><span className="big">${st.action.ok ? "ALLOW" : "DENY"}</span><span className="act">${st.action.action}${st.action.ref ? " --ref " + st.action.ref : ""} · event ${st.action.seq}</span>${st.action.reasons.length > 0 && html`<ul>${st.action.reasons.map((r, j) => html`<li key=${j}>${r}</li>`)}</ul>`}</div>` : html`<p className="empty">Nothing requested yet. Every outbound instruction is checked here first.</p>`}</div></section>
+        <section className="panel"><div className="panel-h"><h2>Event chain</h2><span className=${"label"} style=${{ color: st.broken ? "var(--bad)" : "var(--ok)" }}>${st.broken ? "BROKEN" : "verified"}</span></div>
+          <div className="panel-b chain">${st.events.slice(-9).map((e, j, arr) => html`<div key=${e.seq} className=${"blk" + (e.bad ? " bad" : "") + (j === arr.length - 1 && !e.prior ? " new" : "")}>
+            <span className="sq">${e.prior ? "…" : e.seq}</span><div style=${{ minWidth:0 }}><div className="ty">${e.type}</div><div className="lb">${e.label}</div><div className="hs">${e.bad ? "hash mismatch" : e.hash.slice(0,16)}${!e.prior && !e.bad ? " ← " + e.prev.slice(0,6) : ""}</div></div></div>`)}</div></section>
+        <section className="panel"><div className="panel-h"><h2>Outbox</h2><span className="label">drafts only</span></div>
+          <div className="panel-b" style=${{ display:"grid", gap:"8px" }}>${st.drafts.length ? st.drafts.map((d, j) => html`<div className="draft" key=${j}>
+            <div className="draft-h"><span><b>${d.ch}</b> · ${d.to}</span><span className="pill">DRAFT</span></div>
+            ${d.subject && html`<div style=${{ padding:"6px 9px 0", fontWeight:600, fontSize:"12.5px" }}>${d.subject}</div>`}
+            ${d.text_ar && html`<p className="ar" style=${{ margin:"6px 0 0" }}>${d.text_ar}</p>`}
+            <pre>${d.text}</pre><div className="ft">[board:${d.kind}] · a human sends this</div></div>`) : html`<p className="empty">No drafts. Agents never send; they only queue drafts for a human.</p>`}</div></section>
+      </aside>
+    </main>
+  </div>`;
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(html`<${App} />`);
+</script>
+
+</body>
+</html>
