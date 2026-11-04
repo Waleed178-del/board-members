@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Subagent verdict",
+  "description": "Every subagent returns exactly one JSON object of this shape and nothing else. engine/board.py record-verdict validates it.",
+  "type": "object",
+  "required": ["agent", "gate", "subject", "status", "data_quality", "summary_ar", "summary_en", "findings", "evidence"],
+  "properties": {
+    "agent": {"enum": ["tech-spec-auditor", "legal-counsel", "fin-acct-controller", "ops-logistics-coord", "hr-planner"]},
+    "gate": {"enum": ["G1", "G2", "G3", "G4", "G5", "G6", "OPS"]},
+    "subject": {"type": "string", "description": "Exact subject ID from CLAUDE.md section 6"},
+    "status": {"enum": ["APPROVED", "VETOED", "NEEDS_INFO"]},
+    "data_quality": {"enum": ["VERIFIED", "UNVERIFIED_INPUTS"], "description": "UNVERIFIED_INPUTS if any input carries [[UNVERIFIED]] or a needed fact is assumed"},
+    "summary_ar": {"type": "string", "description": "Two to four sentences in Arabic: the decision and the reason"},
+    "summary_en": {"type": "string"},
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["severity", "code", "detail"],
+        "properties": {
+          "severity": {"enum": ["CRITICAL", "HIGH", "MEDIUM", "LOW"], "description": "Any CRITICAL forces VETOED"},
+          "code": {"type": "string", "description": "Stable UPPER_SNAKE identifier, e.g. NO_LD_CLAUSE, UNSERVICEABLE_PLC"},
+          "detail": {"type": "string"},
+          "ref": {"type": "string", "description": "file:line or clause number"},
+          "fix": {"type": "string", "description": "Exact change that would clear the finding"}
+        }
+      }
+    },
+    "conditions": {"type": "array", "items": {"type": "string"}, "description": "Conditions attached to an APPROVED verdict"},
+    "evidence": {"type": "array", "items": {"type": "string"}, "description": "Repo relative paths actually reviewed. The engine hashes them."},
+    "extra": {"type": "object", "description": "Agent specific structured output (spare parts BOM, risk scores, journal proposals, schedule)"}
+  }
+}

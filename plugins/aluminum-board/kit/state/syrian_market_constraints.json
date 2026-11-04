@@ -1,0 +1,92 @@
+{
+  "_doc": "Syrian local operating constraints. Every critical section must be verified by a named human with a date before Gate G1 can pass. Verification expires after max_age_days because banking and FX rules move fast. All seed entries below are CANDIDATES written without local confirmation. Replace them with what your maintenance engineers and bank actually confirm. Edit only with BOARD_MAINTENANCE=1.",
+  "max_age_days": 90,
+  "sections": {
+    "electrical_brands": {
+      "critical": true,
+      "verified": false,
+      "verified_by": null,
+      "verified_on": null,
+      "rule": "A component is SERVICEABLE only if local_stock and local_repair are both YES, or the contract itemizes a 24 month spare parts package for it.",
+      "items": [
+        {"category": "PLC", "brand": "Siemens", "families": "S7-1200, S7-1500", "local_stock": "UNKNOWN", "local_repair": "UNKNOWN", "local_programmers": "UNKNOWN", "notes": "Confirm licensed TIA Portal availability for local engineers"},
+        {"category": "PLC", "brand": "Schneider Electric", "families": "Modicon M221, M241, M580", "local_stock": "UNKNOWN", "local_repair": "UNKNOWN", "local_programmers": "UNKNOWN", "notes": ""},
+        {"category": "PLC", "brand": "Omron", "families": "CP1, NX/NJ", "local_stock": "UNKNOWN", "local_repair": "UNKNOWN", "local_programmers": "UNKNOWN", "notes": ""},
+        {"category": "PLC", "brand": "Delta Electronics", "families": "DVP, AS", "local_stock": "UNKNOWN", "local_repair": "UNKNOWN", "local_programmers": "UNKNOWN", "notes": "Common in regional markets. Confirm"},
+        {"category": "VFD", "brand": "ABB", "families": "ACS580, ACS880", "local_stock": "UNKNOWN", "local_repair": "UNKNOWN", "notes": ""},
+        {"category": "VFD", "brand": "Danfoss", "families": "FC 302", "local_stock": "UNKNOWN", "local_repair": "UNKNOWN", "notes": ""},
+        {"category": "VFD", "brand": "Delta Electronics", "families": "C2000", "local_stock": "UNKNOWN", "local_repair": "UNKNOWN", "notes": ""},
+        {"category": "MOTOR", "brand": "WEG", "families": "W22", "local_stock": "UNKNOWN", "local_repair": "UNKNOWN", "notes": "Rewinding shops can service most IEC frame induction motors. Confirm frame sizes"},
+        {"category": "MOTOR", "brand": "Siemens", "families": "SIMOTICS", "local_stock": "UNKNOWN", "local_repair": "UNKNOWN", "notes": ""},
+        {"category": "RELAY_CONTACTOR", "brand": "Schneider Electric", "families": "TeSys", "local_stock": "UNKNOWN", "local_repair": "N/A consumable", "notes": ""},
+        {"category": "RELAY_CONTACTOR", "brand": "LS Electric", "families": "Metasol", "local_stock": "UNKNOWN", "local_repair": "N/A consumable", "notes": ""},
+        {"category": "HYDRAULIC_PUMP", "brand": "Rexroth", "families": "A4VSO", "local_stock": "UNKNOWN", "local_repair": "UNKNOWN", "notes": "Extrusion press main pumps. Critical. Confirm local rebuild capability"},
+        {"category": "HYDRAULIC_VALVE", "brand": "Rexroth", "families": "proportional valves", "local_stock": "UNKNOWN", "local_repair": "UNKNOWN", "notes": ""},
+        {"category": "SENSOR", "brand": "Sick / Pepperl+Fuchs / Omron", "families": "proximity, encoders", "local_stock": "UNKNOWN", "local_repair": "N/A consumable", "notes": ""},
+        {"category": "HMI_SCADA", "brand": "Siemens WinCC / Schneider Vijeo", "families": "", "local_stock": "UNKNOWN", "local_repair": "UNKNOWN", "notes": "Licence activation may need online access from vendor servers. Confirm"}
+      ]
+    },
+    "banking_and_payment_rails": {
+      "critical": true,
+      "verified": false,
+      "verified_by": null,
+      "verified_on": null,
+      "items": [
+        {"rail": "Documentary L/C via Syrian bank with foreign correspondent", "status": "UNKNOWN", "notes": "Sanctions regimes on Syria changed during 2025. Banks still de-risk. Confirm with the bank in writing which correspondent banks accept L/C confirmation today, and the vendor's bank country"},
+        {"rail": "Standby L/C or bank guarantee issued by a bank outside Syria", "status": "UNKNOWN", "notes": "Often the realistic route. Confirm cost and collateral"},
+        {"rail": "Direct SWIFT wire from Syria", "status": "UNKNOWN", "notes": "Confirm which currencies and corridors work today"},
+        {"rail": "Payment from an affiliated company abroad", "status": "UNKNOWN", "notes": "Needs transfer pricing and accounting treatment agreed with the auditor"},
+        {"rail": "Informal transfer (hawala)", "status": "UNKNOWN", "notes": "Legal exposure. Legal_Agent must review. Cannot back a performance bond"}
+      ],
+      "vendor_country_screening": "Vendor's own bank may refuse Syrian counterparty funds. Ask every bidder for a written bank acceptance letter before shortlisting."
+    },
+    "customs_and_ports": {
+      "critical": true,
+      "verified": false,
+      "verified_by": null,
+      "verified_on": null,
+      "items": [
+        {"topic": "Ports of entry", "value": "Latakia, Tartus", "notes": "Confirm current operator, average dwell time, free days before demurrage"},
+        {"topic": "Industrial machinery import duty and exemptions", "value": "UNKNOWN", "notes": "Confirm investment law exemptions for production lines and the documents required"},
+        {"topic": "Required documents", "value": "UNKNOWN", "notes": "Commercial invoice, packing list, certificate of origin, bill of lading. Confirm legalization requirements"},
+        {"topic": "Clearing agent", "value": "UNKNOWN", "notes": "Name, licence, past heavy machinery clearances"},
+        {"topic": "Heavy lift and inland transport", "value": "UNKNOWN", "notes": "Press container weights may exceed standard trailers. Confirm cranes and low beds at the port"}
+      ]
+    },
+    "grid_and_power": {
+      "critical": true,
+      "verified": false,
+      "verified_by": null,
+      "verified_on": null,
+      "items": [
+        {"topic": "Medium voltage supply available at site", "value": "UNKNOWN", "notes": "kV level, available MVA, utility approval lead time"},
+        {"topic": "Grid availability hours per day", "value": "UNKNOWN", "notes": "Determines generator sizing. Extrusion presses and billet furnaces cannot tolerate random cuts"},
+        {"topic": "Dedicated substation (مركز تحويل) lead time", "value": "UNKNOWN", "notes": "Transformer procurement and utility energization dates"},
+        {"topic": "Backup generation", "value": "UNKNOWN", "notes": "Diesel or gas supply reliability and cost per kWh"},
+        {"topic": "Voltage and frequency stability", "value": "UNKNOWN", "notes": "Vendor equipment tolerance must exceed measured local variation. Require AVR and line reactors if not"}
+      ]
+    },
+    "fx_and_currency": {
+      "critical": true,
+      "verified": false,
+      "verified_by": null,
+      "verified_on": null,
+      "items": [
+        {"topic": "Official SYP rate source", "value": "UNKNOWN", "notes": "Central bank bulletin. Record the rate on every journal entry"},
+        {"topic": "Parallel market spread", "value": "UNKNOWN", "notes": "Budget at the rate you can actually obtain"},
+        {"topic": "Contract currency policy", "value": "UNKNOWN", "notes": "Default: equipment contract in USD or EUR, civil contract in SYP with an indexation clause"}
+      ]
+    },
+    "local_labor_market": {
+      "critical": false,
+      "verified": false,
+      "verified_by": null,
+      "verified_on": null,
+      "items": [
+        {"topic": "Availability of experienced extrusion press operators", "value": "UNKNOWN"},
+        {"topic": "Availability of PLC and hydraulic maintenance technicians", "value": "UNKNOWN"},
+        {"topic": "Typical hiring lead time", "value": "UNKNOWN"}
+      ]
+    }
+  }
+}

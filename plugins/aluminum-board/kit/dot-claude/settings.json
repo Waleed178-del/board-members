@@ -1,0 +1,39 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 engine/board.py status:*)",
+      "Bash(python3 engine/board.py check-gate:*)",
+      "Bash(python3 engine/board.py verify:*)",
+      "Bash(python3 engine/board.py members:*)",
+      "Bash(python3 engine/board.py rules:*)",
+      "Bash(python3 engine/board.py authorize:*)",
+      "Bash(python3 -m unittest:*)",
+      "mcp__board-ledger"
+    ]
+  },
+  "enableAllProjectMcpServers": false,
+  "enabledMcpjsonServers": ["board-ledger", "telegram-board", "m365-drafts"],
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit|NotebookEdit|Bash|mcp__.*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/guard_state.py\""
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"$CLAUDE_PROJECT_DIR\" && python3 engine/board.py status --brief && python3 engine/board.py verify"
+          }
+        ]
+      }
+    ]
+  }
+}

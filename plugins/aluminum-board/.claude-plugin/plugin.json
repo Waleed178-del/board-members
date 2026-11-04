@@ -1,0 +1,11 @@
+{
+  "name": "aluminum-board",
+  "version": "1.0.0",
+  "description": "Gated agentic board of directors for an aluminum extrusion factory project in Syria: deterministic stage gate engine, five specialist subagents, PIN based human approvals, drafts only Microsoft 365 and Telegram connectors, and an interactive simulator. Installs into a project with /aluminum-board:board-init.",
+  "author": {
+    "name": "waleed178-del"
+  },
+  "homepage": "https://github.com/waleed178-del/board-members",
+  "repository": "https://github.com/waleed178-del/board-members",
+  "keywords": ["governance", "board", "stage-gate", "manufacturing", "construction", "syria", "arabic", "subagents"]
+}

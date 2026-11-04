@@ -7,6 +7,19 @@ Humans approve with a PIN in their own terminal.
 > It is a decision support, audit and workflow gating engine. It does not pour concrete, sign contracts or
 > move money. It makes sure nobody does those things out of sequence or without evidence.
 
+## Install as a Claude Code plugin | التثبيت كإضافة
+
+```bash
+/plugin marketplace add waleed178-del/board-members
+```
+
+```bash
+/plugin install aluminum-board@board-members
+```
+
+Then, inside the project that should host the board, run `/aluminum-board:board-init` and restart Claude Code.
+`/aluminum-board:board-demo` serves the simulator. Details: `plugins/aluminum-board/README.md`.
+
 ## Architecture | البنية
 
 ```
